@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<WonkaEthInitialization>
+    <Web3HttpUrl></Web3HttpUrl>
+    <BlockchainEngine>
+        <ContractAddress>0x7e51d4a94c3649e496d91b8aeed0e05fa4e896ae</ContractAddress>
+        <ContractSender>0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4</ContractSender>
+        <ContractPassword>8b69607d2f3611925c8802b5c8433acfdbdf9f35f13f346535fe736e5ef01ae4</ContractPassword>
+        <ContractGetterMethod>getAttrValueBytes32</ContractGetterMethod>
+        <ContractABIEmbeddedResource><![CDATA[WonkaSystem.TestData.WonkaEngine.abi]]></ContractABIEmbeddedResource>
+        <BusinessRulesEmbeddedResource><![CDATA[WonkaSystem.TestData.VATCalculationExample.xml]]></BusinessRulesEmbeddedResource>
+        <TrxStateContractAddress>0x9d8c16a27f6efd12cd8164408d3d2a89fb64dc14</TrxStateContractAddress>
+    </BlockchainEngine>    
+    <DefaultValueRetrieval>
+        <ContractMarkupId>N</ContractMarkupId>        
+        <ContractAddress>0xb64de988572f04bb8ee94907ab24533b56b2e954</ContractAddress>
+        <ContractSender>0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4</ContractSender>
+        <ContractPassword>8b69607d2f3611925c8802b5c8433acfdbdf9f35f13f346535fe736e5ef01ae4</ContractPassword>
+        <ContractGetterMethod>getAttrValueBytes32</ContractGetterMethod>
+        <ContractSetterMethod>setAttrValueBytes32</ContractSetterMethod>
+        <ContractABIEmbeddedResource><![CDATA[WonkaSystem.TestData.OrchTest.abi]]></ContractABIEmbeddedResource>
+    </DefaultValueRetrieval>
+    <CustomOperator>
+        <ContractMarkupId>N</ContractMarkupId>
+        <ContractAddress>0xb64de988572f04bb8ee94907ab24533b56b2e954</ContractAddress>
+        <ContractSender>0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4</ContractSender>
+        <ContractPassword>8b69607d2f3611925c8802b5c8433acfdbdf9f35f13f346535fe736e5ef01ae4</ContractPassword>
+        <ContractABIEmbeddedResource><![CDATA[WonkaSystem.TestData.OrchTest.abi]]></ContractABIEmbeddedResource>        
+        <CustomOpMarkupId>INVOKE_VAT_LOOKUP</CustomOpMarkupId>
+        <CustomOpContractMethod>lookupVATDenominator</CustomOpContractMethod>
+    </CustomOperator>    
+</WonkaEthInitialization>

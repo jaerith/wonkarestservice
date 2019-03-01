@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2005
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonkaRestService", "WonkaRestService\WonkaRestService.csproj", "{5214F90B-6203-43E7-B551-CB4F4CEBE72D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonkaRestService.Tests", "WonkaRestService.Tests\WonkaRestService.Tests.csproj", "{F053FEFF-2609-4E9F-B696-E96B68CB4CA6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5214F90B-6203-43E7-B551-CB4F4CEBE72D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5214F90B-6203-43E7-B551-CB4F4CEBE72D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5214F90B-6203-43E7-B551-CB4F4CEBE72D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5214F90B-6203-43E7-B551-CB4F4CEBE72D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F053FEFF-2609-4E9F-B696-E96B68CB4CA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F053FEFF-2609-4E9F-B696-E96B68CB4CA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F053FEFF-2609-4E9F-B696-E96B68CB4CA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F053FEFF-2609-4E9F-B696-E96B68CB4CA6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {59AFABED-6D6B-4AE9-BC66-22ECCA2E4149}
+	EndGlobalSection
+EndGlobal

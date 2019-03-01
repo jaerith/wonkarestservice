@@ -1,0 +1,329 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This API provides access to the Trx State API for the Wonka service.\n\nThe real Url is: http://blah.blah.azure.com/api/trxstate",
+    "version": "1.0.0",
+    "title": "Wonka TrxState API",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "somebody@specifyyourowndomainhere.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host": "localhost:1234",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "TrxState",
+      "description": "Adds owners and executors to the trx state",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "TrxStateConfirm",
+      "description": "Gets and sets data about trx state confirmations"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/trxstate": {
+      /*
+      "get": {
+        "tags": [
+          "TrxState"
+        ],
+        "summary": "N/A",
+        "description": "N/A",
+        "operationId": "N/A",
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "something something",
+            "required": true,
+            "type": "string",
+            "default": "blah blah blah"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/"
+            }
+          },
+          "400": {
+            "description": "Invalid EAN value"
+          }
+        }
+      },
+      */
+      "post": {
+        "tags": [
+          "TrxState"
+        ],
+        "summary": "Uploads member list for a RuleTree's transaction state",
+        "description": "Provided data will be persisted to the trx state",
+        "operationId": "PostTrxStateRoster",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Roster for the Trx State",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TrxStateRoster"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TrxStateRoster"
+            }
+          },
+          "400": {
+            "description": "Invalid data"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "TrxState"
+        ],
+        "summary": "Uploads member list for a RuleTree's transaction state",
+        "description": "Provided data will be persisted to the trx state",
+        "operationId": "PutTrxStateRoster",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Roster for the Trx State",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TrxStateRoster"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TrxStateRoster"
+            }
+          },
+          "400": {
+            "description": "Invalid data"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "TrxState"
+        ],
+        "summary": "Removes member list from a RuleTree's transaction state",
+        "description": "Provided data will be removed from the trx state",
+        "operationId": "DeleteTrxStateRoster",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Roster for the Trx State",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TrxStateRoster"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TrxStateRoster"
+            }
+          },
+          "400": {
+            "description": "Invalid data"
+          }
+        }
+      }    
+    },
+    "/trxstateconfirm": {
+      "get": {
+        "tags": [
+          "TrxStateConfirm"
+        ],
+        "summary": "Returns whether or not an owner has confirmed an impending transaction",
+        "description": "Returns whether or not an owner has confirmed an impending transaction",
+        "operationId": "ConfirmTransaction",
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "ruletree",
+            "in": "query",
+            "description": "ID for ruletree",
+            "required": true,
+            "type": "string",
+            "default": "123456789012345"
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "description": "Account ID for owner",
+            "required": true,
+            "type": "string",
+            "default": "123456789012345"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Owner has provided confirmation for the RuleTree"
+          },
+          "400": {
+            "description": "Owner has not provided confirmation for the RuleTree"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "wonka_auth": {
+      "type": "oauth2",
+      "authorizationUrl": "http://wonka.blah.blah/oauth/dialog",
+      "flow": "implicit",
+      "scopes": {
+        "write:wonka": "modify ruletree",
+        "read:wonka": "read ruletree"
+      }
+    },
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "TrxStateRoster": {
+      "type": "object",
+      "properties": {
+        "RuleTreeID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "RuleTreeName": {
+          "type": "string"
+        },
+        "RuleTreeIsRegistered": {
+          "type": "boolean",
+          "default": false
+        },
+        "Owners": {
+          "type": "array",
+          "xml": {
+            "name": "Owners",
+            "wrapped": true
+          },
+          "items": {
+            "$ref": "#/definitions/TrxStateAccount"
+          }
+        },
+        "Executors": {
+          "type": "array",
+          "xml": {
+            "name": "Owners",
+            "wrapped": true
+          },
+          "items": {
+            "$ref": "#/definitions/TrxStateAccount"
+          }
+        },
+        "TrxStateCredientials": {
+          "type": "object",
+          "properties": {
+            "Password": {
+              "type": "string"
+            },
+            "Username": {
+              "type": "string"
+            }
+          },
+          "xml": {
+            "name": "TrxStateCredientials"
+          }
+        },
+        "ErrorMessage": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "SvcTrxStateRoster"
+      }
+    },
+    "TrxStateAccount": {
+      "type": "object",
+      "properties": {
+        "AccountID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "AccountName": {
+          "type": "string"
+        },
+        "AccountWeight": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "ParentCategoryID": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "xml": {
+        "name": "Account"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  }
+}
