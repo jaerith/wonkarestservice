@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -17,6 +18,8 @@ using WonkaBre.RuleTree;
 using WonkaPrd;
 using WonkaRef;
 
+using WonkaRestService.Extensions;
+
 namespace WonkaRestService.Controllers
 {
     public class InvokeController : ApiController
@@ -27,8 +30,10 @@ namespace WonkaRestService.Controllers
         static private string msOrchContractAddress  = "";
         static private string msAbiWonka             = "";
         static private string msAbiOrchContract      = "";
+        static private string msRulesContents        = "";
 
-        static private WonkaBreSource moDefaultSource = null;
+        static private WonkaBreSource       moDefaultSource  = null;
+        static private IMetadataRetrievable moMetadataSource = null;
 
         static private Dictionary<string, WonkaBreSource> moAttrSourceMap = new Dictionary<string, WonkaBreSource>();
         static private Dictionary<string, WonkaBreSource> moCustomOpMap   = new Dictionary<string, WonkaBreSource>();
@@ -55,10 +60,47 @@ namespace WonkaRestService.Controllers
         }
         */
 
-        public void Post([FromBody]IDictionary<string, string> poRecord)
+        public HttpResponseMessage Post([FromBody]IDictionary<string, string> poRecord)
         {
-            Init();
+            Hashtable poTrxRecord = new Hashtable();
 
+            var response = Request.CreateResponse<Hashtable>(HttpStatusCode.Created, poTrxRecord);
+
+            string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
+
+            response.Headers.Location = new Uri(uri);
+
+            try
+            {
+                Init();
+
+                if (poRecord != null)
+                {
+                    poTrxRecord = poRecord.TransformToTrxRecord();
+
+                    ExecuteDotNet();
+                }
+
+                response = Request.CreateResponse<Hashtable>(HttpStatusCode.Created, poTrxRecord);
+            }
+            catch (Exception ex)
+            {
+                string sErrorMsg = String.Format("ERROR!  Invoke web method -> Error Message : {0}",
+                                                 ex.ToString());
+
+                /*
+                if ((ex.InnerException != null) && (ex.InnerException.Message != null))
+                    item.ErrorMessage = ex.InnerException.Message;
+                else if (!String.IsNullOrEmpty(ex.Message))
+                    item.ErrorMessage = ex.Message;
+                */
+
+                response = Request.CreateResponse<Hashtable>(HttpStatusCode.BadRequest, poTrxRecord);
+
+                // Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+            }
+
+            return response;
 
         }
 
@@ -113,19 +155,21 @@ namespace WonkaRestService.Controllers
         {
             var TmpAssembly = Assembly.GetExecutingAssembly();
 
-            string sRulesContents = "";
-
-            IMetadataRetrievable MetadataSource = new WonkaData.WonkaMetadataVATSource();
-
             // Using the metadata source, we create an instance of a defined data domain
             WonkaRefEnvironment RefEnv =
-                WonkaRefEnvironment.CreateInstance(false, MetadataSource);
+                WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
 
-            // Read the XML markup that lists the business rules (i.e., the RuleTree)
-            using (var RulesReader = new StreamReader(TmpAssembly.GetManifestResourceStream("WonkaRestService.WonkaData.VATCalculationExample.xml")))
+            if (String.IsNullOrEmpty(msRulesContents))
             {
-                sRulesContents = RulesReader.ReadToEnd();
+                // Read the XML markup that lists the business rules (i.e., the RuleTree)
+                using (var RulesReader = new StreamReader(TmpAssembly.GetManifestResourceStream("WonkaRestService.WonkaData.VATCalculationExample.xml")))
+                {
+                    msRulesContents = RulesReader.ReadToEnd();
+                }
             }
+
+            if (moMetadataSource == null)
+                moMetadataSource = new WonkaData.WonkaMetadataVATSource();
 
             if (moOrchInitData == null)
             {
@@ -147,7 +191,7 @@ namespace WonkaRestService.Controllers
                     WonkaInit.RetrieveEmbeddedResources(TmpAssembly);
 
                     // The initialization data is transformed into a structure used by the WonkaEth namespace
-                    moOrchInitData = WonkaInit.TransformIntoOrchestrationInit(MetadataSource);
+                    moOrchInitData = WonkaInit.TransformIntoOrchestrationInit(moMetadataSource);
                 }
 
                 if (moWonkaRegistryInit == null)
@@ -242,6 +286,44 @@ namespace WonkaRestService.Controllers
             var result = getRecordValueFunction.CallAsync<string>(psAttrName).Result;
 
             return result;
+        }
+
+        public void ExecuteDotNet()
+        {
+            // Using the metadata source, we create an instance of a defined data domain
+            WonkaRefEnvironment RefEnv =
+                WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
+
+            // Creating an instance of the rules engine using our rules and the metadata
+            WonkaBreRulesEngine RulesEngine =
+                    new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moMetadataSource);
+
+            /*
+             * NOTE: Will be put back later
+             * 
+            // Gets a predefined data record that will be our analog for new data coming into the system
+            WonkaProduct NewProduct = GetNewProduct();
+
+            // Check that the data has been populated correctly on the "new" record
+            string sStatusValueBefore = GetAttributeValue(NewProduct, AccountStsAttr);
+
+            // Since the rules can reference values from different records (like O.Price for the existing
+            // record's price and N.Price for the new record's price), we need to provide the delegate
+            // that can pull the existing (i.e., old) record using a key
+            RulesEngine.GetCurrentProductDelegate = GetOldProduct;
+
+            // Validate the new record using our rules engine and its initialized RuleTree
+            WonkaBre.Reporting.WonkaBreRuleTreeReport Report = RulesEngine.Validate(NewProduct);
+
+            // Now retrieve the AccountStatus value and see if the rules have altered it (which should
+            // not be the case)
+            string sStatusValueAfter = GetAttributeValue(NewProduct, AccountStsAttr);
+
+            if (Report.GetRuleSetFailureCount() > 0)
+            {
+                throw new Exception("Oh heavens to Betsy! Something bad happened!");
+            }
+            */
         }
 
         #endregion
