@@ -297,7 +297,7 @@ namespace WonkaRestService.Controllers
             return result;
         }
 
-        private void ExecuteDotNet(WonkaProduct WonkaRecord)
+        private void ExecuteDotNet(WonkaProduct NewRecord)
         {
             // Using the metadata source, we create an instance of a defined data domain
             WonkaRefEnvironment RefEnv =
@@ -310,28 +310,21 @@ namespace WonkaRestService.Controllers
                     new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moMetadataSource);
 
             // Check that the data has been populated correctly on the "new" record
-            string sVATAmountForHRMC = WonkaRecord.GetAttributeValue(VATAmountForHMRCAttr);
+            string sVATAmountForHRMC = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
 
             // Since the rules can reference values from different records (like O.Price for the existing
             // record's price and N.Price for the new record's price), we need to provide the delegate
             // that can pull the existing (i.e., old) record using a key
             RulesEngine.GetCurrentProductDelegate = GetOldProduct;
 
-            /*
-             * NOTE: Will be put back later
-             * 
             // Validate the new record using our rules engine and its initialized RuleTree
-            WonkaBre.Reporting.WonkaBreRuleTreeReport Report = RulesEngine.Validate(NewProduct);
+            WonkaBre.Reporting.WonkaBreRuleTreeReport Report = RulesEngine.Validate(NewRecord);
 
-            // Now retrieve the AccountStatus value and see if the rules have altered it (which should
-            // not be the case)
-            string sStatusValueAfter = GetAttributeValue(NewProduct, AccountStsAttr);
+            // Check that the data has been populated correctly on the "new" record
+            string sVATAmountForHRMCAfter = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
 
             if (Report.GetRuleSetFailureCount() > 0)
-            {
                 throw new Exception("Oh heavens to Betsy! Something bad happened!");
-            }
-            */
         }
 
         #endregion
