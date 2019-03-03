@@ -16,10 +16,15 @@ namespace WonkaRestService.Extensions
             if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId).GetRowCount() <= 0)
                 throw new Exception("ERROR!  Provided incoming product has empty group.");
 
-            string sAttrValue = poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0][poTargetAttr.AttrId];
+            string sAttrValue = "";
 
-            if (String.IsNullOrEmpty(sAttrValue))
-                throw new Exception("ERROR!  Provided incoming product has no value for needed key(" + poTargetAttr.AttrName + ").");
+            if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0].ContainsKey(poTargetAttr.AttrId))
+            {
+                sAttrValue = poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0][poTargetAttr.AttrId];
+            }
+
+            //if (String.IsNullOrEmpty(sAttrValue))
+            //    throw new Exception("ERROR!  Provided incoming product has no value for needed key(" + poTargetAttr.AttrName + ").");
 
             return sAttrValue;
         }
@@ -94,6 +99,10 @@ namespace WonkaRestService.Extensions
             WonkaRefEnvironment WonkaRefEnv = WonkaRefEnvironment.GetInstance();
 
             WonkaProduct WonkaRecord = new WonkaProduct();
+
+            // Apply default values (which is necessary for the Wonka .NET engine)
+            foreach (WonkaRefAttr TempAttr in WonkaRefEnv.AttrCache)
+                WonkaRecord.SetAttribute(TempAttr, "???");
 
             foreach (string sKeyName in poRecord.Keys)
             {
