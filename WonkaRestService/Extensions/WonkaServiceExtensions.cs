@@ -25,6 +25,10 @@ namespace WonkaRestService.Extensions
             {
                 WonkaRefAttr TempAttribute = WonkaRefEnv.GetAttributeByAttrName(sKeyName);
 
+                // NOTE: This section should be put back when we're testing for real
+                //if (TempAttribute == null)
+                //    throw new Exception("ERROR!  Key(" + sKeyName + ") does not map to any known attributes in the metadata.");
+
                 string sAttrValue = poRecord[sKeyName];
 
                 // NOTE: Test the value here
