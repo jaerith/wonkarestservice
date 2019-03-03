@@ -62,7 +62,7 @@ namespace WonkaRestService.Controllers
 
         public HttpResponseMessage Post([FromBody]IDictionary<string, string> poRecord)
         {
-            Hashtable poTrxRecord = new Hashtable();
+            Hashtable poTrxRecord = poRecord.TransformToTrxRecord();
 
             var response = Request.CreateResponse<Hashtable>(HttpStatusCode.Created, poTrxRecord);
 
@@ -76,9 +76,10 @@ namespace WonkaRestService.Controllers
 
                 if (poRecord != null)
                 {
-                    poTrxRecord = poRecord.TransformToTrxRecord();
 
-                    ExecuteDotNet();
+                    WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
+
+                    ExecuteDotNet(WonkaRecord);
                 }
 
                 response = Request.CreateResponse<Hashtable>(HttpStatusCode.Created, poTrxRecord);
@@ -149,6 +150,14 @@ namespace WonkaRestService.Controllers
             var contract = web3.Eth.GetContract(TargetSource.ContractABI, TargetSource.ContractAddress);
 
             return contract;
+        }
+
+        // Serves only as a mockup for the rules engine
+        public WonkaProduct GetOldProduct(Dictionary<string,string> poProductKeys)
+        {
+            WonkaProduct OldProduct = new WonkaProduct();
+         
+            return OldProduct;            
         }
 
         private void Init()
@@ -288,30 +297,29 @@ namespace WonkaRestService.Controllers
             return result;
         }
 
-        public void ExecuteDotNet()
+        private void ExecuteDotNet(WonkaProduct WonkaRecord)
         {
             // Using the metadata source, we create an instance of a defined data domain
             WonkaRefEnvironment RefEnv =
                 WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
 
+            WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
+
             // Creating an instance of the rules engine using our rules and the metadata
             WonkaBreRulesEngine RulesEngine =
                     new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moMetadataSource);
 
-            /*
-             * NOTE: Will be put back later
-             * 
-            // Gets a predefined data record that will be our analog for new data coming into the system
-            WonkaProduct NewProduct = GetNewProduct();
-
             // Check that the data has been populated correctly on the "new" record
-            string sStatusValueBefore = GetAttributeValue(NewProduct, AccountStsAttr);
+            string sVATAmountForHRMC = WonkaRecord.GetAttributeValue(VATAmountForHMRCAttr);
 
             // Since the rules can reference values from different records (like O.Price for the existing
             // record's price and N.Price for the new record's price), we need to provide the delegate
             // that can pull the existing (i.e., old) record using a key
             RulesEngine.GetCurrentProductDelegate = GetOldProduct;
 
+            /*
+             * NOTE: Will be put back later
+             * 
             // Validate the new record using our rules engine and its initialized RuleTree
             WonkaBre.Reporting.WonkaBreRuleTreeReport Report = RulesEngine.Validate(NewProduct);
 
