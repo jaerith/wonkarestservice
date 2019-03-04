@@ -24,6 +24,7 @@ namespace WonkaRestService.Controllers
 {
     public class InvokeController : ApiController
     {
+        static private bool   mbInteractWithChain    = false;
         static private string msSenderAddress        = "";
         static private string msPassword             = "";
         static private string msWonkaContractAddress = "";
@@ -32,11 +33,14 @@ namespace WonkaRestService.Controllers
         static private string msAbiOrchContract      = "";
         static private string msRulesContents        = "";
 
+        static private string msCustomOpId     = "";
+        static private string msCustomOpMethod = "";
+
         static private WonkaBreSource       moDefaultSource  = null;
         static private IMetadataRetrievable moMetadataSource = null;
 
         static private Dictionary<string, WonkaBreSource> moAttrSourceMap = new Dictionary<string, WonkaBreSource>();
-        static private Dictionary<string, WonkaBreSource> moCustomOpMap   = new Dictionary<string, WonkaBreSource>();
+        static private Dictionary<string, WonkaBreSource> moCustomOpMap   = null;
 
         static private WonkaEth.Orchestration.Init.OrchestrationInitData moOrchInitData      = null;
         static private WonkaEth.Init.WonkaEthRegistryInitialization      moWonkaRegistryInit = null;
@@ -135,6 +139,39 @@ namespace WonkaRestService.Controllers
             // NOTE: Yet to be implemented
 
             return sOrchestrationContractAddress;
+        }
+
+        private void ExecuteDotNet(WonkaProduct NewRecord)
+        {
+            // Using the metadata source, we create an instance of a defined data domain
+            WonkaRefEnvironment RefEnv =
+                WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
+
+            WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
+
+            // Creating an instance of the rules engine using our rules and the metadata
+            //WonkaBreRulesEngine RulesEngine =
+            //        new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moMetadataSource)
+
+            WonkaBreRulesEngine RulesEngine =
+                new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
+
+            // Check that the data has been populated correctly on the "new" record
+            string sVATAmountForHRMC = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
+
+            // Since the rules can reference values from different records (like O.Price for the existing
+            // record's price and N.Price for the new record's price), we need to provide the delegate
+            // that can pull the existing (i.e., old) record using a key
+            // RulesEngine.GetCurrentProductDelegate = GetOldProduct;
+
+            // Validate the new record using our rules engine and its initialized RuleTree
+            WonkaBre.Reporting.WonkaBreRuleTreeReport Report = RulesEngine.Validate(NewRecord);
+
+            // Check that the data has been populated correctly on the "new" record
+            string sVATAmountForHRMCAfter = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
+
+            if (Report.GetRuleSetFailureCount() > 0)
+                throw new Exception("Oh heavens to Betsy! Something bad happened!");
         }
 
         public Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
@@ -267,9 +304,26 @@ namespace WonkaRestService.Controllers
 
                 if (moCustomOpMap == null)
                 {
+                    // These values indicate the Custom Operator "INVOKE_VAT_LOOKUP" which has been used in the markup - 
+                    // its implementation can be found in the method "lookupVATDenominator"
+                    msCustomOpId     = "INVOKE_VAT_LOOKUP";
+                    msCustomOpMethod = "lookupVATDenominator";
+
                     // Here a mapping is created, where each Custom Operator points to a specific contract and its "implementation" method
                     // - the class that contains this information (contract, accessors, etc.) is of the WonkaBreSource type    
-                    moCustomOpMap = moOrchInitData.BlockchainCustomOpFunctions;
+                    if ((moOrchInitData.BlockchainCustomOpFunctions != null) && (moOrchInitData.BlockchainCustomOpFunctions.Count() > 0))
+                        moCustomOpMap = moOrchInitData.BlockchainCustomOpFunctions;
+                    else
+                    {
+                        moCustomOpMap = new Dictionary<string, WonkaBreSource>();
+
+                        // Here a mapping is created, where each Custom Operator points to a specific contract and its "implementation" method
+                        // - the class that contains this information (contract, accessors, etc.) is of the WonkaBreSource type
+                        WonkaBreSource CustomOpSource =
+                            new WonkaBreSource(msCustomOpId, msSenderAddress, msPassword, msOrchContractAddress, msAbiOrchContract, LookupVATDenominator, msCustomOpMethod);
+
+                        moCustomOpMap[msCustomOpId] = CustomOpSource;
+                    }
                 }
 
                 /*
@@ -286,45 +340,35 @@ namespace WonkaRestService.Controllers
             }
         }
 
-        private string RetrieveValueMethod(WonkaBre.RuleTree.WonkaBreSource poTargetSource, string psAttrName)
+        private string LookupVATDenominator(string psSaleItemType, string psCountryOfSale, string psDummyVal1, string psDummyVal2)
         {
-            var contract = GetContract(poTargetSource);
-
-            var getRecordValueFunction = contract.GetFunction(poTargetSource.MethodName);
-
-            var result = getRecordValueFunction.CallAsync<string>(psAttrName).Result;
-
-            return result;
+            if (psSaleItemType == "Widget" && psCountryOfSale == "UK")
+                return "5";
+            else
+                return "1";
         }
 
-        private void ExecuteDotNet(WonkaProduct NewRecord)
+        private string RetrieveValueMethod(WonkaBre.RuleTree.WonkaBreSource poTargetSource, string psAttrName)
         {
-            // Using the metadata source, we create an instance of a defined data domain
-            WonkaRefEnvironment RefEnv =
-                WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
+            string sResult = "";
 
-            WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
+            if (mbInteractWithChain)
+            {
+                try
+                {
+                    var contract = GetContract(poTargetSource);
 
-            // Creating an instance of the rules engine using our rules and the metadata
-            WonkaBreRulesEngine RulesEngine =
-                    new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moMetadataSource);
+                    var getRecordValueFunction = contract.GetFunction(poTargetSource.MethodName);
 
-            // Check that the data has been populated correctly on the "new" record
-            string sVATAmountForHRMC = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
+                    sResult = getRecordValueFunction.CallAsync<string>(psAttrName).Result;
+                }
+                catch (Exception ex)
+                {
+                    // NOTE: Should throw the exception here?
+                }
+            }
 
-            // Since the rules can reference values from different records (like O.Price for the existing
-            // record's price and N.Price for the new record's price), we need to provide the delegate
-            // that can pull the existing (i.e., old) record using a key
-            RulesEngine.GetCurrentProductDelegate = GetOldProduct;
-
-            // Validate the new record using our rules engine and its initialized RuleTree
-            WonkaBre.Reporting.WonkaBreRuleTreeReport Report = RulesEngine.Validate(NewRecord);
-
-            // Check that the data has been populated correctly on the "new" record
-            string sVATAmountForHRMCAfter = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
-
-            if (Report.GetRuleSetFailureCount() > 0)
-                throw new Exception("Oh heavens to Betsy! Something bad happened!");
+            return sResult;
         }
 
         #endregion
