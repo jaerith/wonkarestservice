@@ -13,20 +13,29 @@ namespace WonkaRestService.Extensions
     {
         public static string GetAttributeValue(this WonkaProduct poTargetProduct, WonkaRefAttr poTargetAttr)
         {
-            if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId).GetRowCount() <= 0)
-                throw new Exception("ERROR!  Provided incoming product has empty group.");
-
             string sAttrValue = "";
 
-            if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0].ContainsKey(poTargetAttr.AttrId))
+            //if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId).GetRowCount() <= 0)
+            //    throw new Exception("ERROR!  Provided incoming product has empty group.");
+
+            if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId).GetRowCount() > 0)
             {
-                sAttrValue = poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0][poTargetAttr.AttrId];
+                if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0].ContainsKey(poTargetAttr.AttrId))
+                    sAttrValue = poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0][poTargetAttr.AttrId];
+
+                //if (String.IsNullOrEmpty(sAttrValue))
+                //    throw new Exception("ERROR!  Provided incoming product has no value for needed key(" + poTargetAttr.AttrName + ").");
             }
 
-            //if (String.IsNullOrEmpty(sAttrValue))
-            //    throw new Exception("ERROR!  Provided incoming product has no value for needed key(" + poTargetAttr.AttrName + ").");
-
             return sAttrValue;
+        }
+
+        public static void SetAttribute(this WonkaProduct poTargetProduct, WonkaRefAttr poTargetAttr, string psTargetValue)
+        {
+            if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId).GetRowCount() <= 0)
+                poTargetProduct.GetProductGroup(poTargetAttr.GroupId).AppendRow();
+
+            poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0][poTargetAttr.AttrId] = psTargetValue;
         }
 
         public static Hashtable TransformToTrxRecord(this IDictionary<string, string> poRecord)
@@ -102,7 +111,19 @@ namespace WonkaRestService.Extensions
 
             // Apply default values (which is necessary for the Wonka .NET engine)
             foreach (WonkaRefAttr TempAttr in WonkaRefEnv.AttrCache)
-                WonkaRecord.SetAttribute(TempAttr, "???");
+            {
+                string sCurrValue = WonkaRecord.GetAttributeValue(TempAttr);
+
+                if (String.IsNullOrEmpty(sCurrValue))
+                {
+                    if (TempAttr.IsDecimal)
+                        WonkaRecord.SetAttribute(TempAttr, "0.00");
+                    else if (TempAttr.IsNumeric)
+                        WonkaRecord.SetAttribute(TempAttr, "0");
+                    else
+                        WonkaRecord.SetAttribute(TempAttr, "???");
+                }
+            }
 
             foreach (string sKeyName in poRecord.Keys)
             {
@@ -117,14 +138,6 @@ namespace WonkaRestService.Extensions
             }
 
             return WonkaRecord;
-        }
-
-        public static void SetAttribute(this WonkaProduct poTargetProduct, WonkaRefAttr poTargetAttr, string psTargetValue)
-        {
-            if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId).GetRowCount() <= 0)
-                poTargetProduct.GetProductGroup(poTargetAttr.GroupId).AppendRow();
-
-            poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0][poTargetAttr.AttrId] = psTargetValue;
         }
 
     }

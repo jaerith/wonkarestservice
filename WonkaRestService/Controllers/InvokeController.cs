@@ -22,6 +22,18 @@ using WonkaRestService.Extensions;
 
 namespace WonkaRestService.Controllers
 {
+    /// <summary>
+    /// 
+    /// This controller invokes the Wonka rules engine.  You can test the service by using the POST/PUT methods with the following payload:
+    ///
+    /// {
+    ///   "NewSaleEAN": "9781234567890",
+    ///   "NewSaleItemType": "Widget",
+    ///   "CountryOfSale": "UK",
+    ///   "NewSalesTransSeq": "123456789"  
+    /// }
+    ///
+    /// </summary>
     public class InvokeController : ApiController
     {
         static private bool   mbInteractWithChain    = false;
@@ -147,6 +159,9 @@ namespace WonkaRestService.Controllers
             WonkaRefEnvironment RefEnv =
                 WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
 
+            GetValuesFromOtherSources(NewRecord);
+
+            WonkaRefAttr NewSellTaxAmountAttr = RefEnv.GetAttributeByAttrName("NewSellTaxAmount");
             WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
 
             // Creating an instance of the rules engine using our rules and the metadata
@@ -157,6 +172,7 @@ namespace WonkaRestService.Controllers
                 new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
 
             // Check that the data has been populated correctly on the "new" record
+            string sNewSellTaxAmt    = NewRecord.GetAttributeValue(NewSellTaxAmountAttr);
             string sVATAmountForHRMC = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
 
             // Since the rules can reference values from different records (like O.Price for the existing
@@ -168,6 +184,7 @@ namespace WonkaRestService.Controllers
             WonkaBre.Reporting.WonkaBreRuleTreeReport Report = RulesEngine.Validate(NewRecord);
 
             // Check that the data has been populated correctly on the "new" record
+            string sNewSellTaxAmtAfter    = NewRecord.GetAttributeValue(NewSellTaxAmountAttr);
             string sVATAmountForHRMCAfter = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
 
             if (Report.GetRuleSetFailureCount() > 0)
@@ -197,6 +214,23 @@ namespace WonkaRestService.Controllers
             return OldProduct;            
         }
 
+        private void GetValuesFromOtherSources(WonkaProduct NewSaleProduct)
+        {
+            // Using the metadata source, we create an instance of a defined data domain
+            WonkaRefEnvironment RefEnv =
+                WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
+
+            WonkaRefAttr NewSalePriceAttr        = RefEnv.GetAttributeByAttrName("NewSalePrice");
+            WonkaRefAttr PrevSellTaxAmtAttr      = RefEnv.GetAttributeByAttrName("PrevSellTaxAmount");
+            WonkaRefAttr NewSellTaxAmtAttr       = RefEnv.GetAttributeByAttrName("NewSellTaxAmount");
+            WonkaRefAttr NewVATAmountForHRMCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
+
+            WonkaServiceExtensions.SetAttribute(NewSaleProduct, NewSalePriceAttr,        "100");
+            WonkaServiceExtensions.SetAttribute(NewSaleProduct, PrevSellTaxAmtAttr,      "5");
+            WonkaServiceExtensions.SetAttribute(NewSaleProduct, NewSellTaxAmtAttr,       "0");
+            WonkaServiceExtensions.SetAttribute(NewSaleProduct, NewVATAmountForHRMCAttr, "0");
+        }
+
         private void Init()
         {
             var TmpAssembly = Assembly.GetExecutingAssembly();
@@ -219,6 +253,11 @@ namespace WonkaRestService.Controllers
 
             if (moOrchInitData == null)
             {
+                var DelegateMap =
+                    new Dictionary<string, WonkaBre.Readers.WonkaBreXmlReader.ExecuteCustomOperator>();
+
+                DelegateMap["lookupVATDenominator"] = LookupVATDenominator;
+
                 // Read the configuration file that contains all the initialization details regarding the rules engine 
                 // (like addresses of contracts, senders, passwords, etc.)
                 using (var XmlReader = new System.IO.StreamReader(TmpAssembly.GetManifestResourceStream("WonkaRestService.WonkaData.VATCalculationExample.init.xml")))
@@ -237,7 +276,7 @@ namespace WonkaRestService.Controllers
                     WonkaInit.RetrieveEmbeddedResources(TmpAssembly);
 
                     // The initialization data is transformed into a structure used by the WonkaEth namespace
-                    moOrchInitData = WonkaInit.TransformIntoOrchestrationInit(moMetadataSource);
+                    moOrchInitData = WonkaInit.TransformIntoOrchestrationInit(moMetadataSource, DelegateMap);
                 }
 
                 if (moWonkaRegistryInit == null)
