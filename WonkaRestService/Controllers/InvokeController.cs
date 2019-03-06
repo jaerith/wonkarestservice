@@ -19,6 +19,7 @@ using WonkaPrd;
 using WonkaRef;
 
 using WonkaRestService.Extensions;
+using WonkaRestService.Models;
 
 namespace WonkaRestService.Controllers
 {
@@ -57,30 +58,50 @@ namespace WonkaRestService.Controllers
         static private WonkaEth.Orchestration.Init.OrchestrationInitData moOrchInitData      = null;
         static private WonkaEth.Init.WonkaEthRegistryInitialization      moWonkaRegistryInit = null;
 
+        /**
+         ** NOTE: Likely will be removed in the near future
+         **
         // GET: api/Invoke
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
+         **/
 
+        /**
+         ** NOTE: Likely will be removed in the near future
+         **
         // GET: api/Invoke/5
         public string Get(int id)
         {
             return "value";
         }
+         **/
 
-        /*
+        /**
+         ** NOTE: Likely will be removed in the near future
+         **
         // POST: api/Invoke
         public void Post([FromBody]string value)
         {
         }
-        */
+         **/
 
-        public HttpResponseMessage Post([FromBody]IDictionary<string, string> poRecord)
+        /// <summary>
+        /// 
+        /// This method will accept a data record, which will then be used to invoke the rules engine
+        /// and execute it within the .NET domain only.
+        /// 
+        /// <param name="poRecord">The data record to feed into the rules engine/param>
+        /// <returns>Contains the Response with the updated record (and an error message if an error occurs)</returns>
+        /// </summary>
+        public HttpResponseMessage PostRecord([FromBody]IDictionary<string, string> poRecord)
         {
             Hashtable poTrxRecord = poRecord.TransformToTrxRecord();
 
-            var response = Request.CreateResponse<Hashtable>(HttpStatusCode.Created, poTrxRecord);
+            SvcBasicRecord BasicRecord = new SvcBasicRecord() { RecordData = poTrxRecord };
+
+            var response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.Created, BasicRecord);
 
             string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
 
@@ -96,23 +117,23 @@ namespace WonkaRestService.Controllers
                     WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
 
                     ExecuteDotNet(WonkaRecord);
+
+                    BasicRecord.RecordData = WonkaRecord.TransformToTrxRecord();
                 }
 
-                response = Request.CreateResponse<Hashtable>(HttpStatusCode.Created, poTrxRecord);
+                response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.Created, BasicRecord);
             }
             catch (Exception ex)
             {
                 string sErrorMsg = String.Format("ERROR!  Invoke web method -> Error Message : {0}",
                                                  ex.ToString());
 
-                /*
                 if ((ex.InnerException != null) && (ex.InnerException.Message != null))
-                    item.ErrorMessage = ex.InnerException.Message;
+                    BasicRecord.ErrorMessage = ex.InnerException.Message;
                 else if (!String.IsNullOrEmpty(ex.Message))
-                    item.ErrorMessage = ex.Message;
-                */
+                    BasicRecord.ErrorMessage = ex.Message;
 
-                response = Request.CreateResponse<Hashtable>(HttpStatusCode.BadRequest, poTrxRecord);
+                response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.BadRequest, BasicRecord);
 
                 // Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
@@ -121,12 +142,59 @@ namespace WonkaRestService.Controllers
 
         }
 
-        /*
-        // PUT: api/Invoke/5
-        public void Put(int id, [FromBody]string value)
+        /// <summary>
+        /// 
+        /// This method will accept a data record, which will then be used to invoke the rules engine 
+        /// on the blockchain.
+        /// 
+        /// <param name="poRecord">The data record to feed into the rules engine/param>
+        /// <returns>Contains the Response with the updated record (and an error message if an error occurs)</returns>
+        /// </summary>
+        public HttpResponseMessage PutRecord([FromBody]IDictionary<string, string> poRecord)
         {
+            Hashtable poTrxRecord = poRecord.TransformToTrxRecord();
+
+            SvcBasicRecord BasicRecord = new SvcBasicRecord() { RecordData = poTrxRecord };
+
+            var response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.Created, BasicRecord);
+
+            string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
+
+            response.Headers.Location = new Uri(uri);
+
+            try
+            {
+                Init();
+
+                if (poRecord != null)
+                {
+
+                    WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
+
+                    ExecuteDotNet(WonkaRecord);
+
+                    BasicRecord.RecordData = WonkaRecord.TransformToTrxRecord();
+                }
+
+                response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.Created, BasicRecord);
+            }
+            catch (Exception ex)
+            {
+                string sErrorMsg = String.Format("ERROR!  Invoke web method -> Error Message : {0}",
+                                                 ex.ToString());
+
+                if ((ex.InnerException != null) && (ex.InnerException.Message != null))
+                    BasicRecord.ErrorMessage = ex.InnerException.Message;
+                else if (!String.IsNullOrEmpty(ex.Message))
+                    BasicRecord.ErrorMessage = ex.Message;
+
+                response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.BadRequest, BasicRecord);
+
+                // Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+            }
+
+            return response;
         }
-        */
 
         // DELETE: api/Invoke/5
         public void Delete(int id)
@@ -163,10 +231,6 @@ namespace WonkaRestService.Controllers
 
             WonkaRefAttr NewSellTaxAmountAttr = RefEnv.GetAttributeByAttrName("NewSellTaxAmount");
             WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
-
-            // Creating an instance of the rules engine using our rules and the metadata
-            //WonkaBreRulesEngine RulesEngine =
-            //        new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moMetadataSource)
 
             WonkaBreRulesEngine RulesEngine =
                 new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
@@ -365,17 +429,17 @@ namespace WonkaRestService.Controllers
                     }
                 }
 
-                /*
-                WonkaEth.Contracts.WonkaRuleTreeRegistry WonkaRegistry =
-                    WonkaEth.Contracts.WonkaRuleTreeRegistry.CreateInstance(moWonkaRegistryInit.BlockchainRegistry.ContractSender, 
-                                                                            moWonkaRegistryInit.BlockchainRegistry.ContractPassword,
-                                                                            moWonkaRegistryInit.BlockchainRegistry.ContractAddress, 
-                                                                            moWonkaRegistryInit.BlockchainRegistry.ContractABI,
-                                                                            moWonkaRegistryInit.Web3HttpUrl);
+                if (mbInteractWithChain)
+                {
+                    WonkaEth.Contracts.WonkaRuleTreeRegistry WonkaRegistry =
+                        WonkaEth.Contracts.WonkaRuleTreeRegistry.CreateInstance(moWonkaRegistryInit.BlockchainRegistry.ContractSender,
+                                                                                moWonkaRegistryInit.BlockchainRegistry.ContractPassword,
+                                                                                moWonkaRegistryInit.BlockchainRegistry.ContractAddress,
+                                                                                moWonkaRegistryInit.BlockchainRegistry.ContractABI,
+                                                                                moWonkaRegistryInit.Web3HttpUrl);
 
-                RefEnv.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, moOrchInitData.Web3HttpUrl);
-                 */
-
+                    RefEnv.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, moOrchInitData.Web3HttpUrl);
+                }
             }
         }
 
