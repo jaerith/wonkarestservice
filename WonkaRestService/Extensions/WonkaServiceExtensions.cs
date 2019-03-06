@@ -94,6 +94,35 @@ namespace WonkaRestService.Extensions
             return oRecord;
         }
 
+        public static Hashtable TransformToTrxRecord(this WonkaProduct poProduct)
+        {
+            Hashtable oRecord = new Hashtable();
+
+            try
+            { WonkaRefEnvironment.GetInstance(); }
+            catch (Exception ex)
+            { WonkaRefEnvironment.CreateInstance(false, new WonkaRestService.WonkaData.WonkaMetadataVATSource()); }
+
+            WonkaRefEnvironment WonkaRefEnv = WonkaRefEnvironment.GetInstance();
+
+            WonkaRefGroup MainGroup = WonkaRefEnv.GetGroupByGroupName("Main");
+
+            foreach (WonkaPrdGroupDataRow TempDataRow in poProduct.ProductGroups[MainGroup.GroupId])
+            {
+                foreach (int nTempAttrId in TempDataRow.Keys)
+                {
+                    WonkaRefAttr TempAttribute = WonkaRefEnv.GetAttributeByAttrId(nTempAttrId);
+
+                    string sAttrValue = TempDataRow[nTempAttrId];
+
+                    if (!String.IsNullOrEmpty(sAttrValue))
+                        oRecord[TempAttribute.AttrName] = sAttrValue;
+                }
+            }
+
+            return oRecord;
+        }
+
         public static WonkaProduct TransformToWonkaProduct(this IDictionary<string, string> poRecord)
         {
             try
