@@ -398,15 +398,10 @@
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
     <Content Include="WonkaLibs\WonkaBre.dll" />
-    <Content Include="WonkaLibs\WonkaBre.pdb" />
     <Content Include="WonkaLibs\WonkaEth.dll" />
-    <Content Include="WonkaLibs\WonkaEth.pdb" />
     <Content Include="WonkaLibs\WonkaIpfs.dll" />
-    <Content Include="WonkaLibs\WonkaIpfs.pdb" />
     <Content Include="WonkaLibs\WonkaPrd.dll" />
-    <Content Include="WonkaLibs\WonkaPrd.pdb" />
     <Content Include="WonkaLibs\WonkaRef.dll" />
-    <Content Include="WonkaLibs\WonkaRef.pdb" />
     <Content Include="OpenAPI\invoke.openapi.json" />
     <Content Include="OpenAPI\trxstate.openapi.json" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
