@@ -18,6 +18,7 @@ using WonkaBre.RuleTree;
 using WonkaPrd;
 using WonkaRef;
 
+using WonkaRestService.Cache;
 using WonkaRestService.Extensions;
 using WonkaRestService.Models;
 
@@ -37,6 +38,12 @@ namespace WonkaRestService.Controllers
     /// </summary>
     public class InvokeController : ApiController
     {
+        #region CONSTANTS
+
+        public const string CONST_RULES_RESOURCE_STREAM = "WonkaRestService.WonkaData.VATCalculationExample.xml";
+
+        #endregion
+
         static private bool   mbInteractWithChain    = false;
         static private string msSenderAddress        = "";
         static private string msPassword             = "";
@@ -116,7 +123,10 @@ namespace WonkaRestService.Controllers
 
                     WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
 
-                    ExecuteDotNet(WonkaRecord);
+                    WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = ExecuteDotNet(WonkaRecord);
+
+                    if (RuleTreeReport.OverallRuleTreeResult != ERR_CD.CD_SUCCESS)
+                        BasicRecord.RuleTreeReport = RuleTreeReport;
 
                     BasicRecord.RecordData = WonkaRecord.TransformToTrxRecord();
                 }
@@ -135,7 +145,7 @@ namespace WonkaRestService.Controllers
 
                 response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.BadRequest, BasicRecord);
 
-                // Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
 
             return response;
@@ -168,10 +178,10 @@ namespace WonkaRestService.Controllers
 
                 if (poRecord != null)
                 {
-
                     WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
 
-                    ExecuteDotNet(WonkaRecord);
+                    if (mbInteractWithChain)
+                        ExecuteEthereum(WonkaRecord);
 
                     BasicRecord.RecordData = WonkaRecord.TransformToTrxRecord();
                 }
@@ -190,16 +200,20 @@ namespace WonkaRestService.Controllers
 
                 response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.BadRequest, BasicRecord);
 
-                // Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
 
             return response;
         }
 
+        /**
+         ** NOTE: Likely will be removed in the near future
+         **
         // DELETE: api/Invoke/5
         public void Delete(int id)
         {
         }
+         **/
 
         #region Support Methods
 
@@ -221,19 +235,29 @@ namespace WonkaRestService.Controllers
             return sOrchestrationContractAddress;
         }
 
-        private void ExecuteDotNet(WonkaProduct NewRecord)
+        private WonkaBre.Reporting.WonkaBreRuleTreeReport ExecuteDotNet(WonkaProduct NewRecord)
         {
             // Using the metadata source, we create an instance of a defined data domain
             WonkaRefEnvironment RefEnv =
                 WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
+
+            WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
 
             GetValuesFromOtherSources(NewRecord);
 
             WonkaRefAttr NewSellTaxAmountAttr = RefEnv.GetAttributeByAttrName("NewSellTaxAmount");
             WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
 
-            WonkaBreRulesEngine RulesEngine =
-                new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
+            WonkaBreRulesEngine RulesEngine = null;
+            if (ServiceCache.RuleTreeCache.ContainsKey(CONST_RULES_RESOURCE_STREAM))
+                RulesEngine = ServiceCache.RuleTreeCache[CONST_RULES_RESOURCE_STREAM];
+            else
+            {
+                RulesEngine =
+                    new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
+
+                ServiceCache.RuleTreeCache[CONST_RULES_RESOURCE_STREAM] = RulesEngine;
+            }
 
             // Check that the data has been populated correctly on the "new" record
             string sNewSellTaxAmt    = NewRecord.GetAttributeValue(NewSellTaxAmountAttr);
@@ -245,14 +269,100 @@ namespace WonkaRestService.Controllers
             // RulesEngine.GetCurrentProductDelegate = GetOldProduct;
 
             // Validate the new record using our rules engine and its initialized RuleTree
-            WonkaBre.Reporting.WonkaBreRuleTreeReport Report = RulesEngine.Validate(NewRecord);
+            WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = RulesEngine.Validate(NewRecord);
 
             // Check that the data has been populated correctly on the "new" record
             string sNewSellTaxAmtAfter    = NewRecord.GetAttributeValue(NewSellTaxAmountAttr);
             string sVATAmountForHRMCAfter = NewRecord.GetAttributeValue(VATAmountForHMRCAttr);
 
-            if (Report.GetRuleSetFailureCount() > 0)
+            // if (Report.GetRuleSetFailureCount() > 0)
+            //    throw new Exception("Oh heavens to Betsy! Something bad happened!");
+
+            return RuleTreeReport;
+        }
+
+        private void ExecuteEthereum(WonkaProduct NewRecord)
+        {
+            WonkaRefEnvironment RefEnv = WonkaRefEnvironment.GetInstance();
+
+            // Now we assemble the data record for processing - in our VAT Calculation example, parts of the 
+            // logical record can exist within contract(s) within the blockchain (which has been specified 
+            // via Orchestration metadata), like a logistics or supply contract - these properties below 
+            // (NewSaleEAN, NewSaleItemType, CountryOfSale) would be supplied by a client, like an 
+            // eCommerce site, and be persisted to the blockchain so we may apply the RuleTree to the logical record
+            CQS.Contracts.SalesTrxCreateCommand SalesTrxCommand = new CQS.Contracts.SalesTrxCreateCommand();
+
+            WonkaRefAttr NewSaleEANAttr      = RefEnv.GetAttributeByAttrName("NewSaleEAN");
+            WonkaRefAttr NewSaleItemTypeAttr = RefEnv.GetAttributeByAttrName("NewSaleItemType");
+            WonkaRefAttr CountryOfSaleAttr   = RefEnv.GetAttributeByAttrName("CountryOfSale");
+
+            SalesTrxCommand.NewSaleEAN      = Convert.ToInt64(NewRecord.GetAttributeValue(NewSaleEANAttr));
+            SalesTrxCommand.NewSaleItemType = NewRecord.GetAttributeValue(NewSaleItemTypeAttr);
+            SalesTrxCommand.CountryOfSale   = NewRecord.GetAttributeValue(CountryOfSaleAttr);
+
+            #region Invoking the RuleTree for the first time as a single entity
+
+            // The engine's proxy for the blockchain is instantiated here, which will be responsible for serializing
+            // and executing the RuleTree within the engine
+            CQS.Generation.SalesTransactionGenerator TrxGenerator =
+                   new CQS.Generation.SalesTransactionGenerator(SalesTrxCommand, new StringBuilder(msRulesContents), moOrchInitData);
+
+            // Here, we invoke the Rules engine on the blockchain, which will calculate the VAT for a sale and then
+            // retrieve all values of this logical record (including the VAT) and assemble them within 'SalesTrxCommand'
+            bool bValid = TrxGenerator.GenerateSalesTransaction(SalesTrxCommand);
+
+            if (!bValid)
                 throw new Exception("Oh heavens to Betsy! Something bad happened!");
+
+            // Since the purpose of this example was to showcase the calculated VAT, we examine them here 
+            // (while interactively debugging in Visual Studio)
+            string sNewSellTaxAmt    = Convert.ToString(SalesTrxCommand.NewSellTaxAmt);
+            string sNewVATAmtForHMRC = Convert.ToString(SalesTrxCommand.NewVATAmtForHMRC);
+
+            #endregion
+
+            #region Invoking the RuleTree as a registered entity and as a member of a Grove
+
+            // Here, we attempt to call the same RuleTree as above, but we are going to invoke the execution of
+            // its Grove "NewSaleGroup" - since it is the sole member of the Grove, it will still be the only RuleTree
+            // applied to the record - in this scenario, we pretend that we know nothing about the RuleTree or the Grove, 
+            // effectively treating it as a black box and only looking to retrieve the VAT
+            WonkaEth.Contracts.WonkaRuleGrove NewSaleGrove = new WonkaEth.Contracts.WonkaRuleGrove("NewSaleGroup");
+            NewSaleGrove.PopulateFromRegistry(msAbiWonka);
+
+            // The engine's lightweight proxy for the blockchain is instantiated here
+            WonkaEth.Orchestration.WonkaOrchestratorProxy<CQS.Contracts.SalesTrxCreateCommand> TrxGeneratorProxy = 
+                new WonkaEth.Orchestration.WonkaOrchestratorProxy<CQS.Contracts.SalesTrxCreateCommand>(SalesTrxCommand, moOrchInitData);
+
+            // We reset the values here and in the blockchain (by serializing)
+            SalesTrxCommand.NewSellTaxAmt    = 0;
+            SalesTrxCommand.NewVATAmtForHMRC = 0;
+
+            TrxGeneratorProxy.SerializeRecordToBlockchain(SalesTrxCommand);
+
+            // NOTE: Only useful when debugging
+            // TrxGeneratorProxy.DeserializeRecordFromBlockchain(SalesTrxCommand);
+
+            Dictionary<string, WonkaEth.Contracts.IOrchestrate> GroveMembers = new Dictionary<string, WonkaEth.Contracts.IOrchestrate>();
+            GroveMembers[NewSaleGrove.OrderedRuleTrees[0].RuleTreeId] = TrxGeneratorProxy;
+
+            // With their provided proxies for each RuleTree, we can now execute the Grove (or, in this case, our sole RuleTree)
+            NewSaleGrove.Orchestrate(SalesTrxCommand, GroveMembers);
+
+            // Again, since the purpose of this example was to showcase the calculated VAT, we examine them here 
+            // (while interactively debugging in Visual Studio)            
+            sNewSellTaxAmt    = Convert.ToString(SalesTrxCommand.NewSellTaxAmt);
+            sNewVATAmtForHMRC = Convert.ToString(SalesTrxCommand.NewVATAmtForHMRC);
+
+            #endregion
+
+            /*
+            // Now test exporting the RuleTree from the blockchain
+            var RegistryItem = NewSaleGrove.OrderedRuleTrees[0];
+            var ExportedXml  = RegistryItem.ExportXmlString(moOrchInitData.Web3HttpUrl);
+
+            System.Console.WriteLine("DEBUG: The payload is: \n(\n" + ExportedXml + "\n)\n");
+            */
         }
 
         public Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
@@ -306,7 +416,7 @@ namespace WonkaRestService.Controllers
             if (String.IsNullOrEmpty(msRulesContents))
             {
                 // Read the XML markup that lists the business rules (i.e., the RuleTree)
-                using (var RulesReader = new StreamReader(TmpAssembly.GetManifestResourceStream("WonkaRestService.WonkaData.VATCalculationExample.xml")))
+                using (var RulesReader = new StreamReader(TmpAssembly.GetManifestResourceStream(CONST_RULES_RESOURCE_STREAM)))
                 {
                     msRulesContents = RulesReader.ReadToEnd();
                 }

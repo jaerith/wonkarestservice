@@ -12,7 +12,13 @@ namespace WonkaRestService.Models
         #region Constructors
 
         public SvcBasicRecord()
-        {}
+        {
+            RecordData = null;
+
+            ErrorMessage = null;
+
+            RuleTreeReport = null;
+        }
 
         #endregion
 
@@ -21,9 +27,12 @@ namespace WonkaRestService.Models
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public Hashtable RecordData { get; set; }
 
-
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ErrorMessage { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport { get; set; }
+
 
         #endregion
     }
