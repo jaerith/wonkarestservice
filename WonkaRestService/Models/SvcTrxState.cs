@@ -16,11 +16,13 @@ namespace WonkaRestService.Models
          ** NOTE: Empty constructor is needed for deserialization
          **/
         public SvcTrxState() :
-            base(new HashSet<string>(){"Dummy"}, 1, "")
+            base(new HashSet<string>(){"Blank"}, 0, "")
         {
             RuleTreeId = "";
 
             ErrorMessage = null;
+
+            Owners = null;
         }
 
         public SvcTrxState(IEnumerable<string> poOwners, uint pnMinReqScoreForApproval = 0, string psContractAddress = null) :
@@ -29,6 +31,8 @@ namespace WonkaRestService.Models
             RuleTreeId = "";
 
             ErrorMessage = null;
+
+            Owners = null;
         }
 
         public SvcTrxState(string psRulesEngineId, WonkaBreTransactionState poTrxState, HashSet<string> poAllOwners) :
@@ -37,6 +41,11 @@ namespace WonkaRestService.Models
             RuleTreeId = psRulesEngineId;
 
             ErrorMessage = null;
+
+            Owners = null;
+
+            // Need to populate the confirmations
+            poTrxState.GetOwnersConfirmed().ToList().ForEach(x => base.AddConfirmation(x));
         }
 
         #region Properties
@@ -46,7 +55,7 @@ namespace WonkaRestService.Models
         {
             get
             {
-                return this.IsTransactionConfirmed();
+                return base.IsTransactionConfirmed();
             }
         }
 
@@ -55,7 +64,7 @@ namespace WonkaRestService.Models
         {
             get
             {
-                return this.GetCurrentScore();
+                return base.GetCurrentScore();
             }
         }
 
@@ -67,53 +76,54 @@ namespace WonkaRestService.Models
         {
             get
             {
-                return this.GetMinScoreRequirement();
+                return base.GetMinScoreRequirement();
             }
 
             set
             {
                 if (value > 0)
-                    this.SetMinScoreRequirement(value);
+                    base.SetMinScoreRequirement(value);
             }
         }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<TrxStateOwner> Owners
-        { 
-            get
-            {
-                List<TrxStateOwner> CurrOwners = new List<TrxStateOwner>();
-
-                foreach (string TmpConfirmedOwner in this.GetOwnersConfirmed())
-                    CurrOwners.Add(new TrxStateOwner(TmpConfirmedOwner, true, GetOwnerWeight(TmpConfirmedOwner)));
-
-                foreach (string TmpUnconfirmedOwner in this.GetOwnersUnconfirmed())
-                    CurrOwners.Add(new TrxStateOwner(TmpUnconfirmedOwner, false, GetOwnerWeight(TmpUnconfirmedOwner)));
-
-                return CurrOwners;
-            }
-
-            set
-            {
-                if ((value != null) && (value.Count > 0))
-                {
-                    foreach (TrxStateOwner TmpOwner in value)
-                    {
-                        this.SetOwner(TmpOwner.OwnerName, TmpOwner.OwnerWeight);
-
-                        if (TmpOwner.ConfirmedTransaction)
-                            this.AddConfirmation(TmpOwner.OwnerName);
-                    }
-                }
-            }
-
-        }
+        public List<TrxStateOwner> Owners { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string RuleTreeId { get; set; }
 
         #endregion
 
+        #region Methods
+
+        public void RefreshSvcOwnerList()
+        {
+            if (Owners != null)
+            {
+                foreach (TrxStateOwner TmpOwner in Owners)
+                {
+                    this.SetOwner(TmpOwner.OwnerName, TmpOwner.OwnerWeight);
+
+                    if (TmpOwner.ConfirmedTransaction)
+                        this.AddConfirmation(TmpOwner.OwnerName);
+                }
+            }
+            else
+            {
+                if (base.IsOwner("Blank"))
+                    base.RemoveOwner("Blank");
+
+                Owners = new List<TrxStateOwner>();
+
+                foreach (string TmpConfirmedOwner in base.GetOwnersConfirmed())
+                    Owners.Add(new TrxStateOwner(TmpConfirmedOwner, true, GetOwnerWeight(TmpConfirmedOwner)));
+
+                foreach (string TmpUnconfirmedOwner in base.GetOwnersUnconfirmed())
+                    Owners.Add(new TrxStateOwner(TmpUnconfirmedOwner, false, GetOwnerWeight(TmpUnconfirmedOwner)));
+            }
+        }
+
+        #endregion
     }
 
     public class TrxStateOwner
