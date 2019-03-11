@@ -99,7 +99,7 @@ namespace WonkaRestService.Controllers
         /// This method will accept a data record, which will then be used to invoke the rules engine
         /// and execute it within the .NET domain only.
         /// 
-        /// <param name="poRecord">The data record to feed into the rules engine/param>
+        /// <param name="poRecord">The data record to feed into the rules engine</param>
         /// <returns>Contains the Response with the updated record (and an error message if an error occurs)</returns>
         /// </summary>
         public HttpResponseMessage PostRecord([FromBody]IDictionary<string, string> poRecord)
@@ -157,7 +157,7 @@ namespace WonkaRestService.Controllers
         /// This method will accept a data record, which will then be used to invoke the rules engine 
         /// on the blockchain.
         /// 
-        /// <param name="poRecord">The data record to feed into the rules engine/param>
+        /// <param name="poRecord">The data record to feed into the rules engine</param>
         /// <returns>Contains the Response with the updated record (and an error message if an error occurs)</returns>
         /// </summary>
         public HttpResponseMessage PutRecord([FromBody]IDictionary<string, string> poRecord)
