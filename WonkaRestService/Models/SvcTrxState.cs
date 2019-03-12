@@ -96,6 +96,16 @@ namespace WonkaRestService.Models
 
         #region Methods
 
+        public bool IsValid()
+        {
+            bool bIsValid = true;
+
+            if (String.IsNullOrEmpty(RuleTreeId))
+                bIsValid = false;
+
+            return bIsValid;
+        }
+
         public void RefreshSvcOwnerList()
         {
             if (Owners != null)
@@ -126,6 +136,7 @@ namespace WonkaRestService.Models
         #endregion
     }
 
+    [DataContract(Namespace = "http://wonkarestservice.com")]
     public class TrxStateOwner
     {
         public TrxStateOwner(string psOwnerName, bool pbConfirmedTrx, uint pnOwnerWeight)
@@ -135,10 +146,16 @@ namespace WonkaRestService.Models
             OwnerWeight          = pnOwnerWeight;
         }
 
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string OwnerName { get; set; }
 
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool ConfirmedTransaction { get; set; }
 
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public uint OwnerWeight { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string RuleTreeId { get; set; }
     }
 }
