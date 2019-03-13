@@ -317,6 +317,7 @@
     <Compile Include="Controllers\RuleTreeController.cs" />
     <Compile Include="Controllers\TrxStateConfirmController.cs" />
     <Compile Include="Controllers\TrxStateController.cs" />
+    <Compile Include="Controllers\TrxStateOwnerController.cs" />
     <Compile Include="CQS\Contracts\AccountCreateCommand.cs" />
     <Compile Include="CQS\Contracts\AccountDeleteCommand.cs" />
     <Compile Include="CQS\Contracts\AccountUpdateCommand.cs" />
@@ -332,6 +333,7 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\SvcBasicRecord.cs" />
     <Compile Include="Models\SvcTrxState.cs" />
+    <Compile Include="Models\SvcTrxStateOwner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\ApplicationOAuthProvider.cs" />
     <Compile Include="Results\ChallengeResult.cs" />

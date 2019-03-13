@@ -87,7 +87,7 @@ namespace WonkaRestService.Models
         }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<TrxStateOwner> Owners { get; set; }
+        public List<SvcTrxStateOwner> Owners { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string RuleTreeId { get; set; }
@@ -110,7 +110,7 @@ namespace WonkaRestService.Models
         {
             if (Owners != null)
             {
-                foreach (TrxStateOwner TmpOwner in Owners)
+                foreach (SvcTrxStateOwner TmpOwner in Owners)
                 {
                     this.SetOwner(TmpOwner.OwnerName, TmpOwner.OwnerWeight);
 
@@ -123,39 +123,17 @@ namespace WonkaRestService.Models
                 if (base.IsOwner("Blank"))
                     base.RemoveOwner("Blank");
 
-                Owners = new List<TrxStateOwner>();
+                Owners = new List<SvcTrxStateOwner>();
 
                 foreach (string TmpConfirmedOwner in base.GetOwnersConfirmed())
-                    Owners.Add(new TrxStateOwner(TmpConfirmedOwner, true, GetOwnerWeight(TmpConfirmedOwner)));
+                    Owners.Add(new SvcTrxStateOwner(TmpConfirmedOwner, true, GetOwnerWeight(TmpConfirmedOwner)));
 
                 foreach (string TmpUnconfirmedOwner in base.GetOwnersUnconfirmed())
-                    Owners.Add(new TrxStateOwner(TmpUnconfirmedOwner, false, GetOwnerWeight(TmpUnconfirmedOwner)));
+                    Owners.Add(new SvcTrxStateOwner(TmpUnconfirmedOwner, false, GetOwnerWeight(TmpUnconfirmedOwner)));
             }
         }
 
         #endregion
     }
 
-    [DataContract(Namespace = "http://wonkarestservice.com")]
-    public class TrxStateOwner
-    {
-        public TrxStateOwner(string psOwnerName, bool pbConfirmedTrx, uint pnOwnerWeight)
-        {
-            OwnerName            = psOwnerName;
-            ConfirmedTransaction = pbConfirmedTrx;
-            OwnerWeight          = pnOwnerWeight;
-        }
-
-        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string OwnerName { get; set; }
-
-        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public bool ConfirmedTransaction { get; set; }
-
-        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public uint OwnerWeight { get; set; }
-
-        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string RuleTreeId { get; set; }
-    }
 }
