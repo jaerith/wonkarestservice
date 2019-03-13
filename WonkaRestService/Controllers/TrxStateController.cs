@@ -25,7 +25,7 @@ namespace WonkaRestService.Controllers
         /// </summary>
         public HttpResponseMessage GetTrxState(string RuleTreeId)
         {
-            HashSet<string> DummyList = new HashSet<string>() { "DummyOwner" };
+            HashSet<string> DummyList = new HashSet<string>() { "Blank" };
 
             SvcTrxState TrxState = new SvcTrxState(DummyList);
 
@@ -54,10 +54,13 @@ namespace WonkaRestService.Controllers
 
                         OwnersTotal.Union(RulesEngine.TransactionState.GetOwnersUnconfirmed());
 
-                        TrxState = 
-                            new SvcTrxState(sTargetRuleTreeId, (WonkaBre.Permissions.WonkaBreTransactionState) RulesEngine.TransactionState, OwnersTotal);
+                        if (OwnersTotal.Count > 0)
+                        {
+                            TrxState =
+                                new SvcTrxState(sTargetRuleTreeId, (WonkaBre.Permissions.WonkaBreTransactionState)RulesEngine.TransactionState, OwnersTotal);
 
-                        TrxState.RefreshSvcOwnerList();
+                            TrxState.RefreshSvcOwnerList();
+                        }
                     }
                 }
 
@@ -118,12 +121,15 @@ namespace WonkaRestService.Controllers
             try
             {
                 if (TrxState == null)
+                    throw new Exception("ERROR!  No transaction state was provided.");
+
+                if (TrxState.IsValid())
                     throw new Exception("ERROR!  Invalid transaction state was provided.");
 
                 TrxState.RefreshSvcOwnerList();
 
-                string sTargetRuleTreeId =
-                    (!String.IsNullOrEmpty(TrxState.RuleTreeId)) ? TrxState.RuleTreeId : InvokeController.CONST_RULES_RESOURCE_STREAM;
+                string sTargetRuleTreeId = TrxState.RuleTreeId;
+                //    (!String.IsNullOrEmpty(TrxState.RuleTreeId)) ? TrxState.RuleTreeId : InvokeController.CONST_RULES_RESOURCE_STREAM;
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
 
