@@ -114,7 +114,7 @@ namespace WonkaRestService.Controllers
                 if (TrxStateOwner == null)
                     throw new Exception("ERROR!  No transaction state was provided.");
 
-                if (TrxStateOwner.IsValid())
+                if (!TrxStateOwner.IsValid())
                     throw new Exception("ERROR!  Invalid transaction state was provided.");
 
                 string sTargetRuleTreeId = TrxStateOwner.RuleTreeId;

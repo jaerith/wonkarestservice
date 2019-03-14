@@ -123,7 +123,7 @@ namespace WonkaRestService.Controllers
                 if (TrxState == null)
                     throw new Exception("ERROR!  No transaction state was provided.");
 
-                if (TrxState.IsValid())
+                if (!TrxState.IsValid())
                     throw new Exception("ERROR!  Invalid transaction state was provided.");
 
                 TrxState.RefreshSvcOwnerList();
