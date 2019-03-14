@@ -20,7 +20,7 @@ namespace WonkaRestService.Controllers
         /// 
         /// GET: api/TrxState/RuleTreeId
         /// 
-        /// <param name="psRuleTreeId">The ID of the RuleTree</param>
+        /// <param name="RuleTreeId">The ID of the RuleTree</param>
         /// <returns>Contains the Response with the trx state (or an error message if an error occurs)</returns>
         /// </summary>
         public HttpResponseMessage GetTrxState(string RuleTreeId)
@@ -29,7 +29,7 @@ namespace WonkaRestService.Controllers
 
             SvcTrxState TrxState = new SvcTrxState(DummyList);
 
-            var response = Request.CreateResponse<SvcTrxState>(HttpStatusCode.Created, TrxState);
+            var response = Request.CreateResponse<SvcTrxState>(HttpStatusCode.OK, TrxState);
 
             string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
 
@@ -168,7 +168,15 @@ namespace WonkaRestService.Controllers
         }
         */
 
-        // DELETE: api/TrxState/RuleTreeId
+        /// <summary>
+        /// 
+        /// This method will remove the trx state of a RuleTree identified by the RuleTreeId.
+        /// 
+        /// DELETE: api/TrxState/RuleTreeId
+        /// 
+        /// <param name="RuleTreeId">The ID of the RuleTree</param>
+        /// <returns>Contains the Response with the RuleTreeId</returns>
+        /// </summary>
         public HttpResponseMessage Delete(string RuleTreeId)
         {
             var response = Request.CreateResponse<string>(HttpStatusCode.OK, RuleTreeId);
