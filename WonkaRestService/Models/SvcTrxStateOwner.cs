@@ -6,7 +6,6 @@ using System.Xml.Serialization;
 using System.Web;
 using Newtonsoft.Json;
 
-
 namespace WonkaRestService.Models
 {
     [DataContract(Namespace = "http://wonkarestservice.com")]
@@ -20,6 +19,8 @@ namespace WonkaRestService.Models
 
             RuleTreeId = ErrorMessage = null;
         }
+
+        #region Properties
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string OwnerName { get; set; }
@@ -35,4 +36,24 @@ namespace WonkaRestService.Models
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ErrorMessage { get; set; }
-    }}
+
+        #endregion
+
+        #region Methods
+
+        public bool IsValid()
+        {
+            bool bIsValid = true;
+
+            if (String.IsNullOrEmpty(RuleTreeId))
+                bIsValid = false;
+
+            if (String.IsNullOrEmpty(OwnerName))
+                bIsValid = false;
+
+            return bIsValid;
+        }
+
+        #endregion
+    }
+}
