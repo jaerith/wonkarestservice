@@ -35,6 +35,28 @@ namespace WonkaRestService.Models
         public WonkaBreRulesEngine RulesEngine { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<SvcDataSource> CustomOperatorSources
+        {
+            get
+            {
+                if ((RulesEngine != null) && (RulesEngine.CustomOpMap != null))
+                {
+                    List<SvcDataSource> SourceList = new List<SvcDataSource>();
+
+                    foreach (string sTmpSourceId in RulesEngine.CustomOpMap.Keys)
+                    {
+                        SvcDataSource TmpDataSource = new SvcDataSource(sTmpSourceId, RulesEngine.CustomOpMap[sTmpSourceId]);
+                        SourceList.Add(TmpDataSource);
+                    }
+
+                    return SourceList;
+                }
+                else
+                    return null;
+            }
+        }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string DefaultSource
         {
             get
@@ -75,6 +97,28 @@ namespace WonkaRestService.Models
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string RuleTreeOriginUrl { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<SvcDataSource> AttributeSources
+        {
+            get
+            {
+                if ((RulesEngine != null) && (RulesEngine.SourceMap != null))
+                {
+                    List<SvcDataSource> SourceList = new List<SvcDataSource>();
+
+                    foreach (string sTmpSourceId in RulesEngine.SourceMap.Keys)
+                    {
+                        SvcDataSource TmpDataSource = new SvcDataSource(sTmpSourceId, RulesEngine.SourceMap[sTmpSourceId]);
+                        SourceList.Add(TmpDataSource);
+                    }
+
+                    return SourceList;
+                }
+                else
+                    return null;
+            }
+        }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public WonkaBreTransactionState TrxState
