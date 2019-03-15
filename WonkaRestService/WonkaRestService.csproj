@@ -332,6 +332,7 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\SvcBasicRecord.cs" />
+    <Compile Include="Models\SvcDataSource.cs" />
     <Compile Include="Models\SvcRuleTree.cs" />
     <Compile Include="Models\SvcTrxState.cs" />
     <Compile Include="Models\SvcTrxStateOwner.cs" />
