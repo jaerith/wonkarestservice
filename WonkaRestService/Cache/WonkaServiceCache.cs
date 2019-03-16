@@ -24,7 +24,9 @@ namespace WonkaRestService.Cache
         // NOTE: This constructor is necessary for serialization/deserialization purposes
         private WonkaServiceCache()
         {
-            RuleTreeCache = new Dictionary<string, WonkaBreRulesEngine>();
+            RuleTreeCache         = new Dictionary<string, WonkaBreRulesEngine>();
+            RuleTreeOriginCache   = new Dictionary<string, string>();
+            RuleTreeRegistryCache = new Dictionary<string, List<string>>();
         }
 
         static public WonkaServiceCache CreateInstance()
@@ -55,7 +57,13 @@ namespace WonkaRestService.Cache
 
         #region Properties 
 
+        // NOTE: There is currently no locking for these variables, and that will need to be implemented eventually
+
         public Dictionary<string, WonkaBreRulesEngine> RuleTreeCache { get; set; }
+
+        public Dictionary<string, string> RuleTreeOriginCache { get; set; }
+
+        public Dictionary<string, List<string>> RuleTreeRegistryCache { get; set; }
 
         #endregion
     }
