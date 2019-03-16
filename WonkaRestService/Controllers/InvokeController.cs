@@ -217,7 +217,7 @@ namespace WonkaRestService.Controllers
 
         #region Support Methods
 
-        private string DeployWonkaContract()
+        public static string DeployWonkaContract()
         {
             string sWonkaContractAddress = "";
 
@@ -553,7 +553,7 @@ namespace WonkaRestService.Controllers
             }
         }
 
-        private string LookupVATDenominator(string psSaleItemType, string psCountryOfSale, string psDummyVal1, string psDummyVal2)
+        public static string LookupVATDenominator(string psSaleItemType, string psCountryOfSale, string psDummyVal1, string psDummyVal2)
         {
             if (psSaleItemType == "Widget" && psCountryOfSale == "UK")
                 return "5";
