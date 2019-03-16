@@ -20,6 +20,9 @@ namespace WonkaRestService.Models
             RulesEngine       = null;
             RuleTreeOriginUrl = null;
             ErrorMessage      = null;
+
+            msGroveId  = null;
+            mnGroveIdx = 0;
         }
 
         public SvcRuleTree(string psRuleTreeId, string psRuleTreeOriginUrl = "")
@@ -28,6 +31,9 @@ namespace WonkaRestService.Models
             RulesEngine       = null;
             RuleTreeOriginUrl = psRuleTreeOriginUrl;
             ErrorMessage      = null;
+
+            msGroveId  = null;
+            mnGroveIdx = 0;
         }
 
         #region Properties
@@ -76,7 +82,15 @@ namespace WonkaRestService.Models
                 if (RulesEngine != null)
                     return RulesEngine.GroveId;
                 else
-                    return "";
+                    return msGroveId;
+            }
+
+            set
+            {
+                if (RulesEngine != null)
+                    RulesEngine.GroveId = value;
+
+                msGroveId = value;
             }
         }
 
@@ -88,7 +102,15 @@ namespace WonkaRestService.Models
                 if (RulesEngine != null)
                     return RulesEngine.GroveIndex;
                 else
-                    return 0;
+                    return mnGroveIdx;
+            }
+
+            set
+            {
+                if (RulesEngine != null)
+                    RulesEngine.GroveIndex = value;
+
+                mnGroveIdx = value;
             }
         }
 
@@ -151,6 +173,31 @@ namespace WonkaRestService.Models
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ErrorMessage { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        public bool IsValid()
+        {
+            bool bIsValid = true;
+
+            if (String.IsNullOrEmpty(RuleTreeId))
+                bIsValid = false;
+
+            if (String.IsNullOrEmpty(RuleTreeOriginUrl))
+                bIsValid = false;            
+
+            return bIsValid;
+        }
+
+        #endregion
+
+        #region Members
+
+        private string msGroveId;
+        
+        private uint   mnGroveIdx;
 
         #endregion
 
