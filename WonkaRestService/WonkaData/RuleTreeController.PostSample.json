@@ -1,0 +1,106 @@
+﻿{
+  "CustomOperatorSources": [
+    {
+      "AttributeName": "INVOKE_VAT_LOOKUP",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainCustomOpMethodName": "lookupVATDenominator",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSourceId": "INVOKE_VAT_LOOKUP",
+      "BlockchainTypeOfSource": "Contract"
+    }
+  ],
+  "DefaultSource": "",
+  "GroveId": "VATCalculationGrove",
+  "GroveIndex": 0,
+  "RuleTreeId": "WonkaRestService.WonkaData.VATCalculationExample.xml",
+  "AttributeSources": [
+    {
+      "AttributeName": "NewSalesTransSeq",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    },
+    {
+      "AttributeName": "NewSaleVATRateDenom",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    },
+    {
+      "AttributeName": "NewSaleItemType",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    },
+    {
+      "AttributeName": "CountryOfSale",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    },
+    {
+      "AttributeName": "NewSalePrice",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    },
+    {
+      "AttributeName": "PrevSellTaxAmount",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    },
+    {
+      "AttributeName": "NewSellTaxAmount",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    },
+    {
+      "AttributeName": "NewVATAmountForHMRC",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    },
+    {
+      "AttributeName": "NewSaleEAN",
+      "BlockchainContractAddress": "0xb64de988572f04bb8ee94907ab24533b56b2e954",
+      "BlockchainGetValueMethod": "getAttrValueBytes32",
+      "BlockchainSenderAddress": "0x019d19f2f9db5b43f5fb8cdbfc045c21cc5746d4",
+      "BlockchainSetValueMethod": "setAttrValueBytes32",
+      "BlockchainSourceId": "N",
+      "BlockchainTypeOfSource": "Contract"
+    }
+  ],
+  "TrxState": {
+    "ContractAddress": null,
+    "ApprovedExecutors": [
+      
+    ]
+  },
+  "UsingOrchestrationMode": true
+}
