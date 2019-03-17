@@ -4,13 +4,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
+using WonkaBre;
 using WonkaRef;
 using WonkaPrd;
+
+using WonkaRestService.Models;
 
 namespace WonkaRestService.Extensions
 {
     public static class WonkaServiceExtensions
     {
+        public static void SetGroveData(this Dictionary<string, SvcGrove> poGroveCache, SvcRuleTree poTargetRuleTree)
+        {
+            string sGroveId =
+                poGroveCache.Where(x => x.Value.RuleTreeMembers.Contains(poTargetRuleTree.RuleTreeId)).FirstOrDefault().Key;
+
+            if (!String.IsNullOrEmpty(sGroveId))
+            {
+                List<string> GroveTreeList = poGroveCache[sGroveId].RuleTreeMembers;
+                if ((GroveTreeList != null) && (GroveTreeList.Count > 0))
+                {
+                    poTargetRuleTree.GroveId    = sGroveId;
+                    poTargetRuleTree.GroveIndex = (uint) GroveTreeList.IndexOf(poTargetRuleTree.RuleTreeId);
+                }
+            }
+        }
+
         public static string GetAttributeValue(this WonkaProduct poTargetProduct, WonkaRefAttr poTargetAttr)
         {
             string sAttrValue = "";

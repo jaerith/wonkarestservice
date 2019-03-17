@@ -6,6 +6,8 @@ using System.Xml.Serialization;
 
 using WonkaBre;
 
+using WonkaRestService.Models;
+
 namespace WonkaRestService.Cache
 {
     /// <summary>
@@ -21,12 +23,11 @@ namespace WonkaRestService.Cache
 
         private static WonkaServiceCache mInstance = null;
 
-        // NOTE: This constructor is necessary for serialization/deserialization purposes
         private WonkaServiceCache()
         {
-            RuleTreeCache         = new Dictionary<string, WonkaBreRulesEngine>();
-            RuleTreeOriginCache   = new Dictionary<string, string>();
-            RuleTreeRegistryCache = new Dictionary<string, List<string>>();
+            RuleTreeCache       = new Dictionary<string, WonkaBreRulesEngine>();
+            RuleTreeOriginCache = new Dictionary<string, string>();
+            GroveRegistryCache  = new Dictionary<string, SvcGrove>();
         }
 
         static public WonkaServiceCache CreateInstance()
@@ -63,7 +64,7 @@ namespace WonkaRestService.Cache
 
         public Dictionary<string, string> RuleTreeOriginCache { get; set; }
 
-        public Dictionary<string, List<string>> RuleTreeRegistryCache { get; set; }
+        public Dictionary<string, SvcGrove> GroveRegistryCache { get; set; }
 
         #endregion
     }
