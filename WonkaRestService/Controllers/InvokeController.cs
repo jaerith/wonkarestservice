@@ -112,7 +112,7 @@ namespace WonkaRestService.Controllers
 
                     WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                    if (!String.IsNullOrEmpty(sRuleTreeId) && ServiceCache.RuleTreeCache.ContainsKey(sRuleTreeId))
+                    if (!String.IsNullOrEmpty(sRuleTreeId) && !ServiceCache.RuleTreeCache.ContainsKey(sRuleTreeId))
                         throw new Exception("ERROR!  Rule Tree (" + sRuleTreeId + ") since it does not exist.");
 
                     WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
@@ -236,13 +236,17 @@ namespace WonkaRestService.Controllers
 
             WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-            GetValuesFromOtherSources(NewRecord);
+            if (String.IsNullOrEmpty(psRuleTreeId))
+                psRuleTreeId = CONST_RULES_RESOURCE_ID;
+
+            if (psRuleTreeId == CONST_RULES_RESOURCE_ID)
+                GetValuesFromOtherSources(NewRecord);
 
             WonkaRefAttr NewSellTaxAmountAttr = RefEnv.GetAttributeByAttrName("NewSellTaxAmount");
             WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
 
             WonkaBreRulesEngine RulesEngine = null;
-            if (ServiceCache.RuleTreeCache.ContainsKey(psRuleTreeId))
+            if (!String.IsNullOrEmpty(psRuleTreeId) && ServiceCache.RuleTreeCache.ContainsKey(psRuleTreeId))
                 RulesEngine = ServiceCache.RuleTreeCache[psRuleTreeId];
             else
             {
