@@ -40,11 +40,16 @@ namespace WonkaRestService.Controllers
     {
         #region CONSTANTS
 
+        public const string CONST_RULES_RESOURCE_ID     = "VATCalculationExample";
         public const string CONST_RULES_RESOURCE_STREAM = "WonkaRestService.WonkaData.VATCalculationExample.xml";
+
+        public const string CONST_RECORD_KEY_RULE_TREE_ID = "RuleTreeId";
 
         #endregion
 
-        static private bool   mbInteractWithChain    = false;
+        static private bool mbInteractWithChain   = false;
+        static private bool mbCreateDummyTrxState = true;
+
         static private string msSenderAddress        = "";
         static private string msPassword             = "";
         static private string msWonkaContractAddress = "";
@@ -68,29 +73,10 @@ namespace WonkaRestService.Controllers
         /**
          ** NOTE: Likely will be removed in the near future
          **
-        // GET: api/Invoke
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-         **/
-
-        /**
-         ** NOTE: Likely will be removed in the near future
-         **
         // GET: api/Invoke/5
         public string Get(int id)
         {
             return "value";
-        }
-         **/
-
-        /**
-         ** NOTE: Likely will be removed in the near future
-         **
-        // POST: api/Invoke
-        public void Post([FromBody]string value)
-        {
         }
          **/
 
@@ -120,10 +106,18 @@ namespace WonkaRestService.Controllers
 
                 if (poRecord != null)
                 {
+                    string sRuleTreeId = null;
+                    if (poRecord.ContainsKey(CONST_RECORD_KEY_RULE_TREE_ID))
+                        sRuleTreeId = poRecord[CONST_RECORD_KEY_RULE_TREE_ID];
+
+                    WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
+
+                    if (!String.IsNullOrEmpty(sRuleTreeId) && ServiceCache.RuleTreeCache.ContainsKey(sRuleTreeId))
+                        throw new Exception("ERROR!  Rule Tree (" + sRuleTreeId + ") since it does not exist.");
 
                     WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
 
-                    WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = ExecuteDotNet(WonkaRecord);
+                    WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = ExecuteDotNet(WonkaRecord, sRuleTreeId);
 
                     if (RuleTreeReport.OverallRuleTreeResult != ERR_CD.CD_SUCCESS)
                         BasicRecord.RuleTreeReport = RuleTreeReport;
@@ -149,7 +143,6 @@ namespace WonkaRestService.Controllers
             }
 
             return response;
-
         }
 
         /// <summary>
@@ -235,13 +228,13 @@ namespace WonkaRestService.Controllers
             return sOrchestrationContractAddress;
         }
 
-        private WonkaBre.Reporting.WonkaBreRuleTreeReport ExecuteDotNet(WonkaProduct NewRecord)
+        private WonkaBre.Reporting.WonkaBreRuleTreeReport ExecuteDotNet(WonkaProduct NewRecord, string psRuleTreeId = CONST_RULES_RESOURCE_ID)
         {
             // Using the metadata source, we create an instance of a defined data domain
             WonkaRefEnvironment RefEnv =
                 WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
 
-            WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
+            WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
             GetValuesFromOtherSources(NewRecord);
 
@@ -249,14 +242,14 @@ namespace WonkaRestService.Controllers
             WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
 
             WonkaBreRulesEngine RulesEngine = null;
-            if (ServiceCache.RuleTreeCache.ContainsKey(CONST_RULES_RESOURCE_STREAM))
-                RulesEngine = ServiceCache.RuleTreeCache[CONST_RULES_RESOURCE_STREAM];
+            if (ServiceCache.RuleTreeCache.ContainsKey(psRuleTreeId))
+                RulesEngine = ServiceCache.RuleTreeCache[psRuleTreeId];
             else
             {
                 RulesEngine =
                     new WonkaBreRulesEngine(new StringBuilder(msRulesContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
 
-                ServiceCache.RuleTreeCache[CONST_RULES_RESOURCE_STREAM] = RulesEngine;
+                ServiceCache.RuleTreeCache[psRuleTreeId] = RulesEngine;
             }
 
             // Check that the data has been populated correctly on the "new" record

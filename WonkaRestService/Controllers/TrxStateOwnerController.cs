@@ -39,7 +39,7 @@ namespace WonkaRestService.Controllers
                 string sTargetRuleTreeId =
                     (!String.IsNullOrEmpty(RuleTreeId)) ? RuleTreeId : InvokeController.CONST_RULES_RESOURCE_STREAM;
 
-                WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
+                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
                 WonkaBreRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
@@ -119,7 +119,7 @@ namespace WonkaRestService.Controllers
 
                 string sTargetRuleTreeId = TrxStateOwner.RuleTreeId;
 
-                WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
+                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
                 WonkaBreRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
@@ -187,7 +187,7 @@ namespace WonkaRestService.Controllers
                 string sTargetRuleTreeId =
                     (!String.IsNullOrEmpty(RuleTreeId)) ? RuleTreeId : InvokeController.CONST_RULES_RESOURCE_STREAM;
 
-                WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
+                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
                 WonkaBreRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))

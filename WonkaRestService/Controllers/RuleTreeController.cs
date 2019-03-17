@@ -74,7 +74,7 @@ namespace WonkaRestService.Controllers
                 string sTargetRuleTreeId = 
                     (!String.IsNullOrEmpty(RuleTreeId)) ? RuleTreeId : InvokeController.CONST_RULES_RESOURCE_STREAM;
 
-                WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
+                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
                 WonkaBreRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
@@ -138,7 +138,7 @@ namespace WonkaRestService.Controllers
                 if (!RuleTreeData.IsValid())
                     throw new Exception("ERROR!  Invalid rule tree data was provided.");
 
-                WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
+                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
                 if (ServiceCache.RuleTreeCache.ContainsKey(RuleTreeData.RuleTreeId))
                     throw new Exception("ERROR!  Rule tree with ID already exists.");
@@ -216,7 +216,7 @@ namespace WonkaRestService.Controllers
                 string sTargetRuleTreeId =
                     (!String.IsNullOrEmpty(RuleTreeId)) ? RuleTreeId : InvokeController.CONST_RULES_RESOURCE_STREAM;
 
-                WonkaServiceCache ServiceCache = WonkaServiceCache.CreateInstance();
+                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {

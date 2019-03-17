@@ -30,23 +30,12 @@ namespace WonkaRestService.Cache
             GroveRegistryCache  = new Dictionary<string, SvcGrove>();
         }
 
-        static public WonkaServiceCache CreateInstance()
-        {
-            lock (mLock)
-            {
-                if (mInstance == null)
-                    mInstance = new WonkaServiceCache();
-
-                return mInstance;
-            }
-        }
-
         static public WonkaServiceCache GetInstance()
         {
             lock (mLock)
             {
                 if (mInstance == null)
-                    throw new Exception("ERROR!  WonkaServiceCache has not yet been initialized!");
+                    mInstance = new WonkaServiceCache();
 
                 return mInstance;
             }
