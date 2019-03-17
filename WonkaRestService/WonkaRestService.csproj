@@ -333,6 +333,7 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\SvcBasicRecord.cs" />
     <Compile Include="Models\SvcDataSource.cs" />
+    <Compile Include="Models\SvcGrove.cs" />
     <Compile Include="Models\SvcRuleTree.cs" />
     <Compile Include="Models\SvcTrxState.cs" />
     <Compile Include="Models\SvcTrxStateOwner.cs" />
@@ -410,6 +411,7 @@
     <Content Include="Scripts\umd\popper-utils.min.js" />
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
+    <Content Include="WonkaData\VATCalculatePrecheck.xml" />
     <Content Include="WonkaLibs\WonkaBre.dll" />
     <Content Include="WonkaLibs\WonkaEth.dll" />
     <Content Include="WonkaLibs\WonkaIpfs.dll" />
