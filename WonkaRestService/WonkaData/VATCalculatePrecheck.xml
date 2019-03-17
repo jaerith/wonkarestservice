@@ -1,0 +1,36 @@
+﻿<?xml version="1.0"?>
+<RuleTree xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <if description="Start a new sales transaction">
+    <criteria op="AND">
+      <eval id="pop1">(N.NewSalesTransSeq) POPULATED</eval>
+    </criteria>
+
+    <if description="Checking Input Values">
+      <criteria op="AND">
+        <eval id="pop2">(N.NewSaleEAN) POPULATED</eval>
+      </criteria>
+
+      <validate err="severe">
+        <criteria op="AND">
+          <eval id="cmp2">(N.NewSalePrice) GT (0.00)</eval>
+        </criteria>
+
+        <failure_message>ERROR!  Required inputs for VAT calculation have not been provided.</failure_message>
+        <success_message/>
+      </validate>
+
+      <validate err="severe">
+        <criteria op="AND">
+          <eval id="cmp2">(N.NewSalePrice) LT (1000000.00)</eval>
+        </criteria>
+
+        <failure_message>ERROR!  Required inputs for VAT calculation exceed maximum allowed value.</failure_message>
+        <success_message/>
+      </validate>
+
+    </if>
+
+  </if>
+
+</RuleTree>
