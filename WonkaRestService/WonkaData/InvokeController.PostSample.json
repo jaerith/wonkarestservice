@@ -1,0 +1,8 @@
+﻿{
+  "RuleTreeId": "VATPrecheckExample",
+  "NewSaleEAN": "9781234567890",
+  "NewSaleItemType": "Widget",
+  "CountryOfSale": "UK",
+  "NewSalesTransSeq": "123456789",
+  "NewSalePrice": "2000000"
+}

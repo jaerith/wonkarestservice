@@ -1,0 +1,6 @@
+﻿{
+  "GroveId": "VATCalculateClub",
+  "RuleTreeId": "VATPrecheckExample2",
+  "RuleTreeOriginUrl": "https://acmestoragesomewhere/ruletreesamples/VATPrecheckExample.xml",
+  "UsingOrchestrationMode": true
+}
