@@ -454,6 +454,8 @@
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="WonkaData\RuleTreeController.PostSample.json" />
+    <Content Include="WonkaData\InvokeController.PostSample.json" />
+    <Content Include="WonkaData\RuleTreeController.PostSample2.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
