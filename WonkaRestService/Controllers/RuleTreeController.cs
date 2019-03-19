@@ -34,7 +34,6 @@ namespace WonkaRestService.Controllers
         static private string msOrchContractAddress  = "";
         static private string msAbiWonka             = "";
         static private string msAbiOrchContract      = "";
-        static private string msRulesContents        = "";
 
         static private string msCustomOpId     = "";
         static private string msCustomOpMethod = "";
@@ -130,6 +129,8 @@ namespace WonkaRestService.Controllers
 
             response.Headers.Location = new Uri(uri);
 
+            bool bSerialized = false;
+
             try
             {
                 if (RuleTreeData == null)
@@ -163,6 +164,15 @@ namespace WonkaRestService.Controllers
                     ServiceCache.GroveRegistryCache[RuleTreeData.GroveId].RuleTreeMembers.Add(RuleTreeData.RuleTreeId);
 
                     RuleTreeData.RulesEngine = NewRulesEngine;
+
+                    if (RuleTreeData.SerializeToBlockchain)
+                    {
+                        SerializeRefEnv();
+
+                        NewRulesEngine.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka);                       
+                    }
+
+                    bSerialized = true;
                 }
 
                 response = Request.CreateResponse<SvcRuleTree>(HttpStatusCode.Created, RuleTreeData);
@@ -176,6 +186,15 @@ namespace WonkaRestService.Controllers
                     RuleTreeData.ErrorMessage = ex.InnerException.Message;
                 else if (!String.IsNullOrEmpty(ex.Message))
                     RuleTreeData.ErrorMessage = ex.Message;
+
+                // Only here temporarily, useful for debugging purposes
+                if (bSerialized)
+                    RuleTreeData.StackTraceMessage = ex.StackTrace;
+                else
+                {
+                    string sCallString = String.Format("Problem when calling {0}/{1}/{2} -> ", msSenderAddress, msPassword, msOrchContractAddress);
+                    RuleTreeData.StackTraceMessage = sCallString + ex.StackTrace;
+                }
 
                 response = Request.CreateResponse<SvcRuleTree>(HttpStatusCode.BadRequest, RuleTreeData);
 
@@ -412,7 +431,7 @@ namespace WonkaRestService.Controllers
                                                                                 moWonkaRegistryInit.BlockchainRegistry.ContractABI,
                                                                                 moWonkaRegistryInit.Web3HttpUrl);
 
-                    RefEnv.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, moOrchInitData.Web3HttpUrl);
+                    SerializeRefEnv();
                 }
             }
         }
@@ -438,6 +457,13 @@ namespace WonkaRestService.Controllers
             }
 
             return sResult;
+        }
+
+        private void SerializeRefEnv()
+        {
+            WonkaRefEnvironment RefEnv = WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
+
+            RefEnv.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, moOrchInitData.Web3HttpUrl);
         }
 
         #endregion
