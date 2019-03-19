@@ -23,6 +23,8 @@ namespace WonkaRestService.Models
 
             msGroveId  = null;
             mnGroveIdx = 0;
+
+            SerializeToBlockchain = false;
         }
 
         public SvcRuleTree(string psRuleTreeId, string psRuleTreeOriginUrl = "")
@@ -34,11 +36,35 @@ namespace WonkaRestService.Models
 
             msGroveId  = null;
             mnGroveIdx = 0;
+
+            SerializeToBlockchain = false;
         }
 
         #region Properties
 
         public WonkaBreRulesEngine RulesEngine { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<SvcDataSource> AttributeSources
+        {
+            get
+            {
+                if ((RulesEngine != null) && (RulesEngine.SourceMap != null))
+                {
+                    List<SvcDataSource> SourceList = new List<SvcDataSource>();
+
+                    foreach (string sTmpSourceId in RulesEngine.SourceMap.Keys)
+                    {
+                        SvcDataSource TmpDataSource = new SvcDataSource(sTmpSourceId, RulesEngine.SourceMap[sTmpSourceId]);
+                        SourceList.Add(TmpDataSource);
+                    }
+
+                    return SourceList;
+                }
+                else
+                    return null;
+            }
+        }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<SvcDataSource> CustomOperatorSources
@@ -121,26 +147,7 @@ namespace WonkaRestService.Models
         public string RuleTreeOriginUrl { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<SvcDataSource> AttributeSources
-        {
-            get
-            {
-                if ((RulesEngine != null) && (RulesEngine.SourceMap != null))
-                {
-                    List<SvcDataSource> SourceList = new List<SvcDataSource>();
-
-                    foreach (string sTmpSourceId in RulesEngine.SourceMap.Keys)
-                    {
-                        SvcDataSource TmpDataSource = new SvcDataSource(sTmpSourceId, RulesEngine.SourceMap[sTmpSourceId]);
-                        SourceList.Add(TmpDataSource);
-                    }
-
-                    return SourceList;
-                }
-                else
-                    return null;
-            }
-        }
+        public bool SerializeToBlockchain { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public WonkaBreTransactionState TrxState
@@ -173,6 +180,9 @@ namespace WonkaRestService.Models
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ErrorMessage { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string StackTraceMessage { get; set; }
 
         #endregion
 
