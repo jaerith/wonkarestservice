@@ -314,6 +314,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\InvokeController.cs" />
     <Compile Include="Controllers\RegistryController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\RuleTreeController.cs" />
     <Compile Include="Controllers\TrxStateConfirmController.cs" />
     <Compile Include="Controllers\TrxStateController.cs" />
@@ -335,6 +336,7 @@
     <Compile Include="Models\SvcDataSource.cs" />
     <Compile Include="Models\SvcGrove.cs" />
     <Compile Include="Models\SvcRuleTree.cs" />
+    <Compile Include="Models\SvcRuleTreeReport.cs" />
     <Compile Include="Models\SvcTrxState.cs" />
     <Compile Include="Models\SvcTrxStateOwner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
