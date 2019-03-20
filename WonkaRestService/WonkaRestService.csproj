@@ -311,6 +311,7 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Cache\WonkaServiceCache.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\ChainController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\InvokeController.cs" />
     <Compile Include="Controllers\RegistryController.cs" />
@@ -333,6 +334,7 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\SvcBasicRecord.cs" />
+    <Compile Include="Models\SvcChainData.cs" />
     <Compile Include="Models\SvcDataSource.cs" />
     <Compile Include="Models\SvcGrove.cs" />
     <Compile Include="Models\SvcRuleTree.cs" />
