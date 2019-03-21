@@ -167,9 +167,9 @@ namespace WonkaRestService.Controllers
 
                     if (RuleTreeData.SerializeToBlockchain)
                     {
-                        SerializeRefEnv();
+                        SerializeRefEnv();                       
 
-                        NewRulesEngine.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka);                       
+                        NewRulesEngine.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, null, moOrchInitData.Web3HttpUrl);
                     }
 
                     bSerialized = true;
