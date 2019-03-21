@@ -155,7 +155,7 @@ namespace WonkaRestService.Controllers
                      NewRulesEngine =
                         new WonkaBreRulesEngine(new StringBuilder(sRuleTreeContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
 
-                    NewRulesEngine.RuleTreeRoot.Description = RuleTreeData.RuleTreeId;
+                    NewRulesEngine.RuleTreeRoot.Description = "Root" + RuleTreeData.RuleTreeId;
 
                     ServiceCache.RuleTreeCache[RuleTreeData.RuleTreeId]       = NewRulesEngine;
                     ServiceCache.RuleTreeOriginCache[RuleTreeData.RuleTreeId] = RuleTreeData.RuleTreeOriginUrl;
