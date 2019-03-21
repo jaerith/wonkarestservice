@@ -155,6 +155,8 @@ namespace WonkaRestService.Controllers
                      NewRulesEngine =
                         new WonkaBreRulesEngine(new StringBuilder(sRuleTreeContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
 
+                    NewRulesEngine.RuleTreeRoot.Description = RuleTreeData.RuleTreeId;
+
                     ServiceCache.RuleTreeCache[RuleTreeData.RuleTreeId]       = NewRulesEngine;
                     ServiceCache.RuleTreeOriginCache[RuleTreeData.RuleTreeId] = RuleTreeData.RuleTreeOriginUrl;
 
@@ -167,7 +169,7 @@ namespace WonkaRestService.Controllers
 
                     if (RuleTreeData.SerializeToBlockchain)
                     {
-                        SerializeRefEnv();                       
+                        SerializeRefEnv();
 
                         NewRulesEngine.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, null, moOrchInitData.Web3HttpUrl);
                     }
