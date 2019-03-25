@@ -144,6 +144,18 @@ namespace WonkaRestService.Controllers
                 if (ServiceCache.RuleTreeCache.ContainsKey(RuleTreeData.RuleTreeId))
                     throw new Exception("ERROR!  Rule tree with ID already exists.");
 
+                if (!String.IsNullOrEmpty(RuleTreeData.OwnerName))
+                {
+                    if (!ServiceCache.TreeOwnerCache.ContainsKey(RuleTreeData.OwnerName))
+                        throw new Exception("ERROR!  Owner Name(" + RuleTreeData.OwnerName + ") does not exist in the cache.");
+
+                    bool bAnotherTreeWithOwner =
+                        ServiceCache.TreeOwnerCache.Values.Any(x => x.OwnerName == RuleTreeData.OwnerName);
+
+                    if (bAnotherTreeWithOwner)
+                        throw new Exception("ERROR!  Owner Name(" + RuleTreeData.OwnerName + ") already owns a tree and can only have one tree.");
+                }
+
                 Init();
 
                 WonkaBreRulesEngine NewRulesEngine = null;
@@ -171,7 +183,26 @@ namespace WonkaRestService.Controllers
                     {
                         SerializeRefEnv();
 
-                        NewRulesEngine.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, null, moOrchInitData.Web3HttpUrl);
+                        if (!String.IsNullOrEmpty(RuleTreeData.OwnerName) && ServiceCache.TreeOwnerCache.ContainsKey(RuleTreeData.OwnerName))
+                        {
+                            SvcRuleTreeOwner RTOwner = ServiceCache.TreeOwnerCache[RuleTreeData.OwnerName];
+
+                            NewRulesEngine.Serialize(RTOwner.OwnerAddress,
+                                                     RTOwner.OwnerAddress,
+                                                     msWonkaContractAddress,
+                                                     msAbiWonka,
+                                                     moOrchInitData.TrxStateContractAddress,
+                                                     moOrchInitData.Web3HttpUrl);
+                        }
+                        else
+                        {
+                            NewRulesEngine.Serialize(msSenderAddress, 
+                                                     msPassword, 
+                                                     msWonkaContractAddress, 
+                                                     msAbiWonka, 
+                                                     moOrchInitData.TrxStateContractAddress, 
+                                                     moOrchInitData.Web3HttpUrl);
+                        }
                     }
 
                     bSerialized = true;
