@@ -4,6 +4,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using System.Web;
+using Nethereum.Hex.HexConvertors.Extensions;
+using Nethereum.Util;
 using Newtonsoft.Json;
 
 namespace WonkaRestService.Models
@@ -11,6 +13,11 @@ namespace WonkaRestService.Models
     [DataContract(Namespace = "http://wonkarestservice.com")]
     public class SvcRuleTreeOwner
     {
+        public SvcRuleTreeOwner()
+        {
+            OwnerName = OwnerAddress = OwnerPassword = null;
+        }
+
         public SvcRuleTreeOwner(string psOwnerName)
         {
             OwnerName = psOwnerName;
@@ -50,10 +57,10 @@ namespace WonkaRestService.Models
             if (String.IsNullOrEmpty(OwnerName))
                 bIsValid = false;
 
-            if (String.IsNullOrEmpty(OwnerAddress))
+            if (String.IsNullOrEmpty(OwnerAddress) && OwnerAddress.HasHexPrefix())
                 bIsValid = false;
 
-            if (String.IsNullOrEmpty(OwnerPassword))
+            if (String.IsNullOrEmpty(OwnerPassword) && OwnerPassword.HasHexPrefix())
                 bIsValid = false;
 
             return bIsValid;
