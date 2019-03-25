@@ -11,10 +11,16 @@ namespace WonkaRestService.Models
     [DataContract(Namespace = "http://wonkarestservice.com")]
     public class SvcRuleTreeOwner
     {
-        public SvcRuleTreeOwner(string psOwnerName, string psAddress, string psPassword)
+        public SvcRuleTreeOwner(string psOwnerName)
         {
             OwnerName = psOwnerName;
 
+            OwnerAddress = OwnerPassword = null;
+        }
+
+        public SvcRuleTreeOwner(string psOwnerName, string psAddress, string psPassword)
+        {
+            OwnerName     = psOwnerName;
             OwnerAddress  = psAddress;
             OwnerPassword = psPassword;
         }
