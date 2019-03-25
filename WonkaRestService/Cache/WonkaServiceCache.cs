@@ -29,6 +29,7 @@ namespace WonkaRestService.Cache
             RuleTreeOriginCache = new Dictionary<string, string>();
             GroveRegistryCache  = new Dictionary<string, SvcGrove>();
             ReportCache         = new Dictionary<string, List<SvcRuleTreeReport>>();
+            TreeOwnerCache      = new Dictionary<string, SvcRuleTreeOwner>();
         }
 
         static public WonkaServiceCache GetInstance()
@@ -57,6 +58,8 @@ namespace WonkaRestService.Cache
         public Dictionary<string, SvcGrove> GroveRegistryCache { get; set; }
 
         public Dictionary<string, List<SvcRuleTreeReport>> ReportCache { get; set; }
+
+        public Dictionary<string, SvcRuleTreeOwner> TreeOwnerCache { get; set; }
 
         #endregion
     }
