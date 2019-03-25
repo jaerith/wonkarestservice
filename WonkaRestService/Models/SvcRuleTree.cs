@@ -19,6 +19,7 @@ namespace WonkaRestService.Models
             RuleTreeId        = "";
             RulesEngine       = null;
             RuleTreeOriginUrl = null;
+            OwnerName         = null;
             ErrorMessage      = null;
 
             msGroveId  = null;
@@ -32,6 +33,7 @@ namespace WonkaRestService.Models
             RuleTreeId        = psRuleTreeId;
             RulesEngine       = null;
             RuleTreeOriginUrl = psRuleTreeOriginUrl;
+            OwnerName         = null;
             ErrorMessage      = null;
 
             msGroveId  = null;
@@ -139,6 +141,9 @@ namespace WonkaRestService.Models
                 mnGroveIdx = value;
             }
         }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string OwnerName { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string RuleTreeId { get; set; }
