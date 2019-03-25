@@ -85,7 +85,7 @@ namespace WonkaRestService.Controllers
                         RuleTree.RulesEngine = RulesEngine;
 
                     RuleTree.RuleTreeOriginUrl =
-                        ServiceCache.RuleTreeOriginCache.ContainsKey(RuleTreeId) ? ServiceCache.RuleTreeOriginCache[RuleTreeId] : "";
+                        ServiceCache.RuleTreeOriginCache.ContainsKey(RuleTreeId) ? ServiceCache.RuleTreeOriginCache[RuleTreeId].RuleTreeOriginUrl : "";
 
                     ServiceCache.GroveRegistryCache.SetGroveData(RuleTree);
                 }
@@ -150,7 +150,7 @@ namespace WonkaRestService.Controllers
                         throw new Exception("ERROR!  Owner Name(" + RuleTreeData.OwnerName + ") does not exist in the cache.");
 
                     bool bAnotherTreeWithOwner =
-                        ServiceCache.TreeOwnerCache.Values.Any(x => x.OwnerName == RuleTreeData.OwnerName);
+                        ServiceCache.RuleTreeOriginCache.Values.Any(x => x.OwnerName == RuleTreeData.OwnerName);
 
                     if (bAnotherTreeWithOwner)
                         throw new Exception("ERROR!  Owner Name(" + RuleTreeData.OwnerName + ") already owns a tree and can only have one tree.");
@@ -170,7 +170,7 @@ namespace WonkaRestService.Controllers
                     NewRulesEngine.RuleTreeRoot.Description = "Root" + RuleTreeData.RuleTreeId;
 
                     ServiceCache.RuleTreeCache[RuleTreeData.RuleTreeId]       = NewRulesEngine;
-                    ServiceCache.RuleTreeOriginCache[RuleTreeData.RuleTreeId] = RuleTreeData.RuleTreeOriginUrl;
+                    ServiceCache.RuleTreeOriginCache[RuleTreeData.RuleTreeId] = RuleTreeData;
 
                     if (!ServiceCache.GroveRegistryCache.ContainsKey(RuleTreeData.GroveId))
                         ServiceCache.GroveRegistryCache[RuleTreeData.GroveId] = new SvcGrove(RuleTreeData.GroveId);
@@ -188,7 +188,7 @@ namespace WonkaRestService.Controllers
                             SvcRuleTreeOwner RTOwner = ServiceCache.TreeOwnerCache[RuleTreeData.OwnerName];
 
                             NewRulesEngine.Serialize(RTOwner.OwnerAddress,
-                                                     RTOwner.OwnerAddress,
+                                                     RTOwner.OwnerPassword,
                                                      msWonkaContractAddress,
                                                      msAbiWonka,
                                                      moOrchInitData.TrxStateContractAddress,
