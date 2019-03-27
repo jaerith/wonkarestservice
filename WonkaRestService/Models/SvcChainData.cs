@@ -15,6 +15,7 @@ namespace WonkaRestService.Models
         public SvcChainData()
         {
             AttrNum    = 0;
+            AttrValue  = null;
             Attributes = null;
             RuleTrees  = null;
 
@@ -25,6 +26,9 @@ namespace WonkaRestService.Models
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public uint AttrNum { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string AttrValue { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<WonkaRefAttr> Attributes { get; set; }
