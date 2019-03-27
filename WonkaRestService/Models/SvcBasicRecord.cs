@@ -31,6 +31,9 @@ namespace WonkaRestService.Models
         public string ErrorMessage { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string StackTraceMessage { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport { get; set; }
 
 
