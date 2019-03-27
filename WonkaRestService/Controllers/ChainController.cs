@@ -23,6 +23,7 @@ namespace WonkaRestService.Controllers
         #region CONSTANTS
 
         public const string CONST_CHAIN_DATA_KEY_ATTRNUM = "attrnum";
+        public const string CONST_CHAIN_DATA_KEY_ATTRVAL = "attrval";
         public const string CONST_CHAIN_DATA_KEY_ATTRS   = "attributes";
         public const string CONST_CHAIN_DATA_KEY_RLTR    = "ruletrees";
 
@@ -80,6 +81,8 @@ namespace WonkaRestService.Controllers
 
                 if (type == CONST_CHAIN_DATA_KEY_ATTRNUM)
                     ChainData.AttrNum = RetrieveAttrNum();
+                else if (type == CONST_CHAIN_DATA_KEY_ATTRVAL)
+                    ChainData.AttrValue = RetrieveAttrValue(id);
 
                 response = Request.CreateResponse<SvcChainData>(HttpStatusCode.Created, ChainData);
             }
@@ -116,7 +119,7 @@ namespace WonkaRestService.Controllers
             return sOrchestrationContractAddress;
         }
 
-        private Nethereum.Contracts.Contract GetContract()
+        private Nethereum.Contracts.Contract GetWonkaContract()
         {
             var account = new Account(msPassword);
 
@@ -127,6 +130,21 @@ namespace WonkaRestService.Controllers
                 web3 = new Nethereum.Web3.Web3(account);
 
             var contract = web3.Eth.GetContract(msAbiWonka, msWonkaContractAddress);
+
+            return contract;
+        }
+
+        private Nethereum.Contracts.Contract GetOrchContract()
+        {
+            var account = new Account(msPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            var contract = web3.Eth.GetContract(msAbiOrchContract, msOrchContractAddress);
 
             return contract;
         }
@@ -262,11 +280,27 @@ namespace WonkaRestService.Controllers
         {
             uint nAttrNum = 0;
 
-            var getAttrNumFunction = GetContract().GetFunction("getNumberOfAttributes");
+            var getAttrNumFunction = GetWonkaContract().GetFunction("getNumberOfAttributes");
 
             nAttrNum = getAttrNumFunction.CallAsync<uint>().Result;
 
             return nAttrNum;
+        }
+
+        private string RetrieveAttrValue(string psAttrName)
+        {
+            string sAttrValue = "";
+
+            if (!String.IsNullOrEmpty(psAttrName) && moAttrSourceMap.ContainsKey(psAttrName))
+            {
+                var getAttrValueFunction = GetOrchContract().GetFunction(moAttrSourceMap[psAttrName].MethodName);
+
+                sAttrValue = getAttrValueFunction.CallAsync<string>(psAttrName).Result;
+            }
+            else
+                sAttrValue = "ATTRIBUTE NOT VALID";
+
+            return sAttrValue;
         }
 
         // Just a placeholder function
