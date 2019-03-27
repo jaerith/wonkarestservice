@@ -312,6 +312,7 @@
     <Compile Include="Cache\WonkaServiceCache.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\ChainController.cs" />
+    <Compile Include="Controllers\GroveController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\InvokeController.cs" />
     <Compile Include="Controllers\RegistryController.cs" />
