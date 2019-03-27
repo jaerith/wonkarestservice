@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -12,6 +13,7 @@ using WonkaEth.Extensions;
 using WonkaBre.RuleTree;
 using WonkaRef;
 
+using WonkaRestService.Extensions;
 using WonkaRestService.Models;
 
 namespace WonkaRestService.Controllers
@@ -19,11 +21,6 @@ namespace WonkaRestService.Controllers
     public class ChainController : ApiController
     {
         #region CONSTANTS
-
-        public const string CONST_RULES_RESOURCE_ID     = "VATCalculationExample";
-        public const string CONST_RULES_RESOURCE_STREAM = "WonkaRestService.WonkaData.VATCalculationExample.xml";
-
-        public const string CONST_RECORD_KEY_RULE_TREE_ID = "RuleTreeId";
 
         public const string CONST_CHAIN_DATA_KEY_ATTRNUM = "attrnum";
         public const string CONST_CHAIN_DATA_KEY_ATTRS   = "attributes";
@@ -57,14 +54,14 @@ namespace WonkaRestService.Controllers
         /// This method will provide the information from the Wonka engine on the blockchain, to see what has been
         /// serialized to it thus far.
         /// 
-        /// POST: api/chain/list
+        /// POST: api/chain/type/id
         /// 
-        /// TEST PAYLOAD: attrnum,attributes,ruletrees
+        /// TEST PAYLOAD: type=grove&id=123
         /// 
         /// <param name="RuleTreeData">The data needed to instantiate the RuleTree</param>
         /// <returns>Contains the Response with the RuleTree (or an error message if an error occurs)</returns>
         /// </summary>
-        public HttpResponseMessage GetChainData(string list)
+        public HttpResponseMessage GetChainData(string type, string id = "")
         {
             SvcChainData ChainData = new SvcChainData();
 
@@ -76,18 +73,12 @@ namespace WonkaRestService.Controllers
 
             try
             {
-                if (String.IsNullOrEmpty(list))
-                    throw new Exception("ERROR!  No item list of chain data was provided.");
-
-                string[] asDataList = new string[0];
-                if (list.Contains(","))
-                    asDataList = list.Split(new char[1] { ',' });
-                else
-                    asDataList = new string[1] { list };
+                if (String.IsNullOrEmpty(type))
+                    throw new Exception("ERROR!  No type was provided.");
 
                 Init();
 
-                if (asDataList.Contains(CONST_CHAIN_DATA_KEY_ATTRNUM))
+                if (type == CONST_CHAIN_DATA_KEY_ATTRNUM)
                     ChainData.AttrNum = RetrieveAttrNum();
 
                 response = Request.CreateResponse<SvcChainData>(HttpStatusCode.Created, ChainData);
@@ -123,6 +114,21 @@ namespace WonkaRestService.Controllers
             // NOTE: Yet to be implemented
 
             return sOrchestrationContractAddress;
+        }
+
+        private Nethereum.Contracts.Contract GetContract()
+        {
+            var account = new Account(msPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            var contract = web3.Eth.GetContract(msAbiWonka, msWonkaContractAddress);
+
+            return contract;
         }
 
         private void Init()
@@ -256,17 +262,7 @@ namespace WonkaRestService.Controllers
         {
             uint nAttrNum = 0;
 
-            var account = new Account(msPassword);
-
-            Nethereum.Web3.Web3 web3 = null;
-            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
-                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
-            else
-                web3 = new Nethereum.Web3.Web3(account);
-
-            var contract = web3.Eth.GetContract(msAbiWonka, msWonkaContractAddress);
-
-            var getAttrNumFunction = contract.GetFunction("getNumberOfAttributes");
+            var getAttrNumFunction = GetContract().GetFunction("getNumberOfAttributes");
 
             nAttrNum = getAttrNumFunction.CallAsync<uint>().Result;
 
