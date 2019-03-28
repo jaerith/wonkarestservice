@@ -44,10 +44,11 @@ namespace WonkaRestService.Controllers
         public const string CONST_RULES_RESOURCE_STREAM = "WonkaRestService.WonkaData.VATCalculationExample.xml";
 
         public const string CONST_RECORD_KEY_RULE_TREE_ID = "RuleTreeId";
+        public const string CONST_RECORD_KEY_CQS_FLAG     = "CQS";
 
         #endregion
 
-        static private bool mbInteractWithChain   = false;
+        static private bool mbInteractWithChain   = true;
         static private bool mbCreateDummyTrxState = true;
 
         static private string msSenderAddress        = "";
@@ -137,6 +138,8 @@ namespace WonkaRestService.Controllers
                 else if (!String.IsNullOrEmpty(ex.Message))
                     BasicRecord.ErrorMessage = ex.Message;
 
+                BasicRecord.StackTraceMessage = ex.StackTrace;
+
                 response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.BadRequest, BasicRecord);
 
                 Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
@@ -171,12 +174,49 @@ namespace WonkaRestService.Controllers
 
                 if (poRecord != null)
                 {
-                    WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
+                    string sRuleTreeId = null;
+                    bool   bCQSFlag    = false;
+
+                    if (poRecord.ContainsKey(CONST_RECORD_KEY_RULE_TREE_ID))
+                        sRuleTreeId = poRecord[CONST_RECORD_KEY_RULE_TREE_ID];
+
+                    if (poRecord.ContainsKey(CONST_RECORD_KEY_CQS_FLAG))
+                        bCQSFlag = (poRecord[CONST_RECORD_KEY_CQS_FLAG] == "Y");
+
+                    WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
+
+                    if (!String.IsNullOrEmpty(sRuleTreeId) && !ServiceCache.RuleTreeCache.ContainsKey(sRuleTreeId))
+                        throw new Exception("ERROR!  Rule Tree (" + sRuleTreeId + ") cannot be invoked since it does not exist.");
+
+                    var RuleTreeOriginData = ServiceCache.RuleTreeOriginCache[sRuleTreeId];
+
+                    WonkaProduct WonkaRecord = new WonkaProduct();
+
+                    WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = null;
 
                     if (mbInteractWithChain)
-                        ExecuteEthereum(WonkaRecord);
+                    {
+                        if ((sRuleTreeId == CONST_RULES_RESOURCE_ID) && bCQSFlag)
+                        {
+                            WonkaRecord = poRecord.TransformToWonkaProduct();
+
+                            ExecuteEthereumCQS(WonkaRecord, RuleTreeOriginData);
+                        }
+                        else
+                        {
+                            WonkaRecord = poRecord.TransformToWonkaProduct(false);
+                            WonkaRecord.SerializeProductData(ServiceCache.RuleTreeCache[sRuleTreeId], moOrchInitData.Web3HttpUrl);
+
+                            WonkaRecord = poRecord.TransformToWonkaProduct();
+
+                            RuleTreeReport = ExecuteEthereum(WonkaRecord, RuleTreeOriginData, ServiceCache.RuleTreeCache[sRuleTreeId]);
+                        }
+                    }
 
                     BasicRecord.RecordData = WonkaRecord.TransformToTrxRecord();
+
+                    if (RuleTreeReport != null)
+                        BasicRecord.RuleTreeReport = RuleTreeReport;
                 }
 
                 response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.Created, BasicRecord);
@@ -190,6 +230,8 @@ namespace WonkaRestService.Controllers
                     BasicRecord.ErrorMessage = ex.InnerException.Message;
                 else if (!String.IsNullOrEmpty(ex.Message))
                     BasicRecord.ErrorMessage = ex.Message;
+
+                BasicRecord.StackTraceMessage = ex.StackTrace;
 
                 response = Request.CreateResponse<SvcBasicRecord>(HttpStatusCode.BadRequest, BasicRecord);
 
@@ -278,7 +320,26 @@ namespace WonkaRestService.Controllers
             return RuleTreeReport;
         }
 
-        private void ExecuteEthereum(WonkaProduct NewRecord)
+        private WonkaBre.Reporting.WonkaBreRuleTreeReport ExecuteEthereum(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData, WonkaBreRulesEngine RulesEngine)
+        {
+            WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = new WonkaBre.Reporting.WonkaBreRuleTreeReport();
+
+            var BlockchainReport = RuleTreeOriginData.InvokeWithReport(GetWonkaContract(), moOrchInitData.Web3HttpUrl);
+
+            if (BlockchainReport != null)
+            {
+                if (BlockchainReport.NumberOfRuleFailures > 0)
+                    RuleTreeReport.OverallRuleTreeResult = ERR_CD.CD_FAILURE;
+                else
+                    RuleTreeReport.OverallRuleTreeResult = ERR_CD.CD_SUCCESS;
+            }
+
+            NewRecord.DeserializeProductData(RulesEngine, moOrchInitData.Web3HttpUrl);
+
+            return RuleTreeReport;
+        }
+
+        private void ExecuteEthereumCQS(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData)
         {
             WonkaRefEnvironment RefEnv = WonkaRefEnvironment.GetInstance();
 
@@ -289,9 +350,11 @@ namespace WonkaRestService.Controllers
             // eCommerce site, and be persisted to the blockchain so we may apply the RuleTree to the logical record
             CQS.Contracts.SalesTrxCreateCommand SalesTrxCommand = new CQS.Contracts.SalesTrxCreateCommand();
 
-            WonkaRefAttr NewSaleEANAttr      = RefEnv.GetAttributeByAttrName("NewSaleEAN");
-            WonkaRefAttr NewSaleItemTypeAttr = RefEnv.GetAttributeByAttrName("NewSaleItemType");
-            WonkaRefAttr CountryOfSaleAttr   = RefEnv.GetAttributeByAttrName("CountryOfSale");
+            WonkaRefAttr NewSaleEANAttr       = RefEnv.GetAttributeByAttrName("NewSaleEAN");
+            WonkaRefAttr NewSaleItemTypeAttr  = RefEnv.GetAttributeByAttrName("NewSaleItemType");
+            WonkaRefAttr CountryOfSaleAttr    = RefEnv.GetAttributeByAttrName("CountryOfSale");
+            WonkaRefAttr NewSellTaxAmtAttr    = RefEnv.GetAttributeByAttrName("NewSellTaxAmount");
+            WonkaRefAttr NewVATAmtForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
 
             SalesTrxCommand.NewSaleEAN      = Convert.ToInt64(NewRecord.GetAttributeValue(NewSaleEANAttr));
             SalesTrxCommand.NewSaleItemType = NewRecord.GetAttributeValue(NewSaleItemTypeAttr);
@@ -316,8 +379,12 @@ namespace WonkaRestService.Controllers
             string sNewSellTaxAmt    = Convert.ToString(SalesTrxCommand.NewSellTaxAmt);
             string sNewVATAmtForHMRC = Convert.ToString(SalesTrxCommand.NewVATAmtForHMRC);
 
+            WonkaPrd.WonkaPrdExtensions.SetAttribute(NewRecord, NewSellTaxAmtAttr, sNewSellTaxAmt);
+            WonkaPrd.WonkaPrdExtensions.SetAttribute(NewRecord, NewVATAmtForHMRCAttr, sNewVATAmtForHMRC);
+
             #endregion
 
+            /*
             #region Invoking the RuleTree as a registered entity and as a member of a Grove
 
             // Here, we attempt to call the same RuleTree as above, but we are going to invoke the execution of
@@ -352,6 +419,7 @@ namespace WonkaRestService.Controllers
             sNewVATAmtForHMRC = Convert.ToString(SalesTrxCommand.NewVATAmtForHMRC);
 
             #endregion
+            */
 
             /*
             // Now test exporting the RuleTree from the blockchain
@@ -362,7 +430,7 @@ namespace WonkaRestService.Controllers
             */
         }
 
-        public Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
+        private Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
         {
             var account = new Account(TargetSource.Password);
 
@@ -378,7 +446,7 @@ namespace WonkaRestService.Controllers
         }
 
         // Serves only as a mockup for the rules engine
-        public WonkaProduct GetOldProduct(Dictionary<string,string> poProductKeys)
+        private WonkaProduct GetOldProduct(Dictionary<string,string> poProductKeys)
         {
             WonkaProduct OldProduct = new WonkaProduct();
          
@@ -400,6 +468,21 @@ namespace WonkaRestService.Controllers
             WonkaServiceExtensions.SetAttribute(NewSaleProduct, PrevSellTaxAmtAttr,      "5");
             WonkaServiceExtensions.SetAttribute(NewSaleProduct, NewSellTaxAmtAttr,       "0");
             WonkaServiceExtensions.SetAttribute(NewSaleProduct, NewVATAmountForHRMCAttr, "0");
+        }
+
+        private Nethereum.Contracts.Contract GetWonkaContract()
+        {
+            var account = new Account(msPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            var contract = web3.Eth.GetContract(msAbiWonka, msWonkaContractAddress);
+
+            return contract;
         }
 
         private void Init()
