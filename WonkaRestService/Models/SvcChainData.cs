@@ -14,10 +14,10 @@ namespace WonkaRestService.Models
     {
         public SvcChainData()
         {
-            AttrNum    = 0;
+            AttrNum    = null;
             AttrValue  = null;
             Attributes = null;
-            RuleTrees  = null;
+            Result     = null;
 
             ErrorMessage = StackTraceMessage = null;
         }
@@ -25,16 +25,19 @@ namespace WonkaRestService.Models
         #region Properties
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public uint AttrNum { get; set; }
+        public uint? AttrNum { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string AttrValue { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<WonkaRefAttr> Attributes { get; set; }
+        public bool? Result { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, string> RuleTrees { get; set; }
+        public string RuleTreeXml { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<WonkaRefAttr> Attributes { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ErrorMessage { get; set; }

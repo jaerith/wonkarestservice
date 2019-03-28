@@ -24,8 +24,14 @@ namespace WonkaRestService.Controllers
 
         public const string CONST_CHAIN_DATA_KEY_ATTRNUM = "attrnum";
         public const string CONST_CHAIN_DATA_KEY_ATTRVAL = "attrval";
-        public const string CONST_CHAIN_DATA_KEY_ATTRS   = "attributes";
-        public const string CONST_CHAIN_DATA_KEY_RLTR    = "ruletrees";
+        public const string CONST_CHAIN_DATA_KEY_HASTREE = "hastree";
+        public const string CONST_CHAIN_DATA_KEY_RETVAL  = "retval";
+
+        public const string CONST_CHAIN_DATA_KEY_ORCHFLG = "orchflag";
+        public const string CONST_CHAIN_DATA_KEY_ISSRCMP = "mapflag";
+
+        public const string CONST_CHAIN_DATA_KEY_RLTREE  = "ruletree";
+        public const string CONST_CHAIN_DATA_KEY_ATTRS   = "attributes";        
 
         #endregion
 
@@ -83,6 +89,16 @@ namespace WonkaRestService.Controllers
                     ChainData.AttrNum = RetrieveAttrNum();
                 else if (type == CONST_CHAIN_DATA_KEY_ATTRVAL)
                     ChainData.AttrValue = RetrieveAttrValue(id);
+                else if (type == CONST_CHAIN_DATA_KEY_RLTREE)
+                    ChainData.RuleTreeXml = RetrieveRuleTree(id);
+                else if (type == CONST_CHAIN_DATA_KEY_HASTREE)
+                    ChainData.Result = RetrieveHasRuleTree(id);
+                else if (type == CONST_CHAIN_DATA_KEY_RETVAL)
+                    ChainData.AttrValue = RetrieveValueOnRecordViaWonka(id);
+                else if (type == CONST_CHAIN_DATA_KEY_ORCHFLG)
+                    ChainData.Result = RetrieveOrchFlag();
+                else if (type == CONST_CHAIN_DATA_KEY_ISSRCMP)
+                    ChainData.Result = RetrieveAttrMapFlag(id);
 
                 response = Request.CreateResponse<SvcChainData>(HttpStatusCode.Created, ChainData);
             }
@@ -119,21 +135,6 @@ namespace WonkaRestService.Controllers
             return sOrchestrationContractAddress;
         }
 
-        private Nethereum.Contracts.Contract GetWonkaContract()
-        {
-            var account = new Account(msPassword);
-
-            Nethereum.Web3.Web3 web3 = null;
-            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
-                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
-            else
-                web3 = new Nethereum.Web3.Web3(account);
-
-            var contract = web3.Eth.GetContract(msAbiWonka, msWonkaContractAddress);
-
-            return contract;
-        }
-
         private Nethereum.Contracts.Contract GetOrchContract()
         {
             var account = new Account(msPassword);
@@ -145,6 +146,21 @@ namespace WonkaRestService.Controllers
                 web3 = new Nethereum.Web3.Web3(account);
 
             var contract = web3.Eth.GetContract(msAbiOrchContract, msOrchContractAddress);
+
+            return contract;
+        }
+
+        private Nethereum.Contracts.Contract GetWonkaContract()
+        {
+            var account = new Account(msPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            var contract = web3.Eth.GetContract(msAbiWonka, msWonkaContractAddress);
 
             return contract;
         }
@@ -276,6 +292,17 @@ namespace WonkaRestService.Controllers
             }
         }
 
+        private bool RetrieveAttrMapFlag(string psAttrName)
+        {
+            bool bResult = false;
+
+            var mapFlagFunction = GetWonkaContract().GetFunction("getIsSourceMapped");
+
+            bResult = mapFlagFunction.CallAsync<bool>(psAttrName).Result;
+
+            return bResult;
+        }
+
         private uint RetrieveAttrNum()
         {
             uint nAttrNum = 0;
@@ -301,6 +328,66 @@ namespace WonkaRestService.Controllers
                 sAttrValue = "ATTRIBUTE NOT VALID";
 
             return sAttrValue;
+        }
+
+        private bool RetrieveHasRuleTree(string psOwnerAddress)
+        {
+            bool bResult = false;
+
+            var hasRuleTreeFunction = GetWonkaContract().GetFunction("hasRuleTree");
+
+            if (!String.IsNullOrEmpty(psOwnerAddress) && moAttrSourceMap.ContainsKey(psOwnerAddress))
+                bResult = hasRuleTreeFunction.CallAsync<bool>(psOwnerAddress).Result;
+            else
+                bResult = hasRuleTreeFunction.CallAsync<bool>(msSenderAddress).Result;
+
+            return bResult;
+        }
+
+        private bool RetrieveOrchFlag()
+        {
+            bool bResult = false;
+
+            var orchFlagFunction = GetWonkaContract().GetFunction("getOrchestrationMode");
+
+            bResult = orchFlagFunction.CallAsync<bool>().Result;
+
+            return bResult;
+        }
+        
+        private string RetrieveValueOnRecordViaWonka(string psAttrName)
+        {
+            string sAttrValue = "";
+
+            if (!String.IsNullOrEmpty(psAttrName) && moAttrSourceMap.ContainsKey(psAttrName))
+            {
+                var retrieveValueFunction = GetWonkaContract().GetFunction("getValueOnRecord");
+
+                sAttrValue = retrieveValueFunction.CallAsync<string>(msSenderAddress, psAttrName).Result;
+            }
+            else
+                sAttrValue = "ATTRIBUTE NOT VALID";
+
+            return sAttrValue;
+        }
+
+        private string RetrieveRuleTree(string psRuleTreeId)
+        {
+            string sRuleTreeXml = "";
+
+            if (!String.IsNullOrEmpty(psRuleTreeId) && moAttrSourceMap.ContainsKey(psRuleTreeId))
+            {
+                /*
+                 * NOTE: Needs more work
+                WonkaEth.Contracts.WonkaRegistryItem RegistryItem = new WonkaEth.Contracts.WonkaRegistryItem();
+
+                sRuleTreeXml = RegistryItem.ExportXmlString(moOrchInitData.Web3HttpUrl);
+                */
+            }
+            else
+                sRuleTreeXml = "NO RULETREE XML";
+
+            return sRuleTreeXml;
         }
 
         // Just a placeholder function
