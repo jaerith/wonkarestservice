@@ -39,41 +39,37 @@ namespace WonkaRestService.Extensions
     {
         #region CONSTANTS
 
+        public const string CONST_CONTRACT_FUNCTION_EXEC         = "execute"; 
         public const string CONST_CONTRACT_FUNCTION_EXEC_RPT     = "executeWithReport"; 
         public const string CONST_CONTRACT_FUNCTION_GET_LAST_RPT = "getLastRuleReport";
-        public const string CONST_CONTRACT_FUNCTION_HAS_RT       = "hasRuleTree";        
+        public const string CONST_CONTRACT_FUNCTION_HAS_RT       = "hasRuleTree";
 
-        #endregion 
+        #endregion
 
-        public static RuleTreeReport InvokeWithReport(this SvcRuleTree poRuleTree, Contract poWonkaContract, string psWeb3HttpUrl = "")
+        public static void DeserializeProductData(this WonkaProduct poTargetProduct, WonkaBreRulesEngine poRulesEngine, string psWeb3HttpUrl = "")
         {
-            WonkaRefEnvironment RefEnv = WonkaRefEnvironment.GetInstance();
+            try
+            { WonkaRefEnvironment.GetInstance(); }
+            catch (Exception ex)
+            { WonkaRefEnvironment.CreateInstance(false, new WonkaRestService.WonkaData.WonkaMetadataVATSource()); }
 
-            var executeWithReportFunction    = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC_RPT);
-            var executeGetLastReportFunction = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_GET_LAST_RPT);
+            foreach (string sTargetAttrName in poRulesEngine.SourceMap.Keys)
+                poRulesEngine.SourceMap[sTargetAttrName].DeserializeProductData(poTargetProduct, sTargetAttrName, psWeb3HttpUrl);
+        }
 
-            RuleTreeReport ruleTreeReport = null;
+        public static void DeserializeProductData(this WonkaBre.RuleTree.WonkaBreSource poSource, WonkaProduct poTargetProduct, string sAttrName, string psWeb3HttpUrl = "")
+        {
+            var Contract = poSource.GetContract(psWeb3HttpUrl);
 
-            string sRuleTreeOwnerAddress = "";
+            var getAttrFunction = Contract.GetFunction(poSource.MethodName);
 
-            if (!String.IsNullOrEmpty(poRuleTree.OwnerName) && WonkaServiceCache.GetInstance().TreeOwnerCache.ContainsKey(poRuleTree.OwnerName))
-                sRuleTreeOwnerAddress = WonkaServiceCache.GetInstance().TreeOwnerCache[poRuleTree.OwnerName].OwnerAddress;
-            else
-            {
-                // NOTE: Should probably default to another value or throw an exception here
-                sRuleTreeOwnerAddress = poRuleTree.AttributeSources[0].BlockchainSenderAddress;
-            }
+            var gas = getAttrFunction.EstimateGasAsync(sAttrName).Result;
 
-            // NOTE: Caused exception to be thrown
-            // var gas = executeWithReportFunction.EstimateGasAsync(msSenderAddress).Result;
-            var gas = new Nethereum.Hex.HexTypes.HexBigInteger(2000000);
+            var sAttrValue = getAttrFunction.CallAsync<String>(sAttrName).Result;
 
-            var receiptAddAttribute = 
-                executeWithReportFunction.SendTransactionAsync(sRuleTreeOwnerAddress, gas, null, sRuleTreeOwnerAddress).Result;
+            WonkaRefAttr TargetAttr = WonkaRefEnvironment.GetInstance().GetAttributeByAttrName(sAttrName);
 
-            ruleTreeReport = executeGetLastReportFunction.CallDeserializingToObjectAsync<RuleTreeReport>().Result;
-
-            return ruleTreeReport;
+            WonkaServiceExtensions.SetAttribute(poTargetProduct, TargetAttr, sAttrValue);
         }
 
         public static string GetAttributeValue(this WonkaProduct poTargetProduct, WonkaRefAttr poTargetAttr)
@@ -108,6 +104,41 @@ namespace WonkaRestService.Extensions
             var contract = web3.Eth.GetContract(poSource.ContractABI, poSource.ContractAddress);
 
             return contract;
+        }
+
+        public static RuleTreeReport InvokeWithReport(this SvcRuleTree poRuleTree, Contract poWonkaContract, string psWeb3HttpUrl = "")
+        {
+            WonkaRefEnvironment RefEnv = WonkaRefEnvironment.GetInstance();
+
+            var executeFunction              = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC);
+            var executeWithReportFunction    = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC_RPT);
+            var executeGetLastReportFunction = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_GET_LAST_RPT);
+
+            RuleTreeReport ruleTreeReport = null;
+
+            string sRuleTreeOwnerAddress = "";
+
+            if (!String.IsNullOrEmpty(poRuleTree.OwnerName) && WonkaServiceCache.GetInstance().TreeOwnerCache.ContainsKey(poRuleTree.OwnerName))
+                sRuleTreeOwnerAddress = WonkaServiceCache.GetInstance().TreeOwnerCache[poRuleTree.OwnerName].OwnerAddress;
+            else
+            {
+                // NOTE: Should probably default to another value or throw an exception here
+                sRuleTreeOwnerAddress = poRuleTree.AttributeSources[0].BlockchainSenderAddress;
+            }
+
+            // NOTE: Caused exception to be thrown
+            // var gas = executeWithReportFunction.EstimateGasAsync(msSenderAddress).Result;
+            var gas = new Nethereum.Hex.HexTypes.HexBigInteger(2000000);
+
+            //var receiptInvocation = 
+            //    executeWithReportFunction.SendTransactionAsync(sRuleTreeOwnerAddress, gas, null, sRuleTreeOwnerAddress).Result;
+
+            var receiptInvocation = 
+                executeFunction.SendTransactionAsync(sRuleTreeOwnerAddress, gas, null, sRuleTreeOwnerAddress).Result;
+
+            ruleTreeReport = executeGetLastReportFunction.CallDeserializingToObjectAsync<RuleTreeReport>().Result;
+
+            return ruleTreeReport;
         }
 
         public static void SerializeProductData(this WonkaProduct poTargetProduct, WonkaBreRulesEngine poRulesEngine, string psWeb3HttpUrl = "")
