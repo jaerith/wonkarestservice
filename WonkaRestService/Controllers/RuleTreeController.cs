@@ -25,8 +25,7 @@ namespace WonkaRestService.Controllers
     {
         #region CONSTANTS
 
-        static private bool mbInteractWithChain   = false;
-        static private bool mbCreateDummyTrxState = true;
+        static private bool mbInteractWithChain = true;
 
         static private string msSenderAddress        = "";
         static private string msPassword             = "";
@@ -164,18 +163,29 @@ namespace WonkaRestService.Controllers
                 {
                     string sRuleTreeContents = client.DownloadString(RuleTreeData.RuleTreeOriginUrl);
 
-                     NewRulesEngine =
-                        new WonkaBreRulesEngine(new StringBuilder(sRuleTreeContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
+                    bool bAddToRegistry = false;
+
+                    if (!String.IsNullOrEmpty(RuleTreeData.GroveId))
+                        bAddToRegistry = true;
+
+                    NewRulesEngine =
+                        new WonkaBreRulesEngine(new StringBuilder(sRuleTreeContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, bAddToRegistry);
+
+                    if (moAttrSourceMap.Count > 0)
+                        NewRulesEngine.DefaultSource = moAttrSourceMap.Values.Where(x => !String.IsNullOrEmpty(x.SourceId)).FirstOrDefault().SourceId;
 
                     NewRulesEngine.RuleTreeRoot.Description = "Root" + RuleTreeData.RuleTreeId;
 
                     ServiceCache.RuleTreeCache[RuleTreeData.RuleTreeId]       = NewRulesEngine;
                     ServiceCache.RuleTreeOriginCache[RuleTreeData.RuleTreeId] = RuleTreeData;
 
-                    if (!ServiceCache.GroveRegistryCache.ContainsKey(RuleTreeData.GroveId))
-                        ServiceCache.GroveRegistryCache[RuleTreeData.GroveId] = new SvcGrove(RuleTreeData.GroveId);
+                    if (!String.IsNullOrEmpty(RuleTreeData.GroveId))
+                    {
+                        if (!ServiceCache.GroveRegistryCache.ContainsKey(RuleTreeData.GroveId))
+                            ServiceCache.GroveRegistryCache[RuleTreeData.GroveId] = new SvcGrove(RuleTreeData.GroveId);
 
-                    ServiceCache.GroveRegistryCache[RuleTreeData.GroveId].RuleTreeMembers.Add(RuleTreeData.RuleTreeId);
+                        ServiceCache.GroveRegistryCache[RuleTreeData.GroveId].RuleTreeMembers.Add(RuleTreeData.RuleTreeId);
+                    }
 
                     RuleTreeData.RulesEngine = NewRulesEngine;
 
@@ -306,7 +316,7 @@ namespace WonkaRestService.Controllers
 
         #region Methods
 
-        public Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
+        private Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
         {
             var account = new Account(TargetSource.Password);
 
