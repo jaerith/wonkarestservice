@@ -322,6 +322,7 @@
     <Compile Include="Controllers\TrxStateConfirmController.cs" />
     <Compile Include="Controllers\TrxStateController.cs" />
     <Compile Include="Controllers\TrxStateOwnerController.cs" />
+    <Compile Include="Controllers\WonkaBaseController.cs" />
     <Compile Include="CQS\Contracts\AccountCreateCommand.cs" />
     <Compile Include="CQS\Contracts\AccountDeleteCommand.cs" />
     <Compile Include="CQS\Contracts\AccountUpdateCommand.cs" />
