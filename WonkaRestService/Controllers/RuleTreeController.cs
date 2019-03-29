@@ -21,33 +21,8 @@ using WonkaRestService.Models;
 
 namespace WonkaRestService.Controllers
 {
-    public class RuleTreeController : ApiController
+    public class RuleTreeController : WonkaBaseController
     {
-        #region CONSTANTS
-
-        static private bool mbInteractWithChain = true;
-
-        static private string msSenderAddress        = "";
-        static private string msPassword             = "";
-        static private string msWonkaContractAddress = "";
-        static private string msOrchContractAddress  = "";
-        static private string msAbiWonka             = "";
-        static private string msAbiOrchContract      = "";
-
-        static private string msCustomOpId     = "";
-        static private string msCustomOpMethod = "";
-
-        static private WonkaBreSource       moDefaultSource  = null;
-        static private IMetadataRetrievable moMetadataSource = null;
-
-        static private Dictionary<string, WonkaBreSource> moAttrSourceMap = new Dictionary<string, WonkaBreSource>();
-        static private Dictionary<string, WonkaBreSource> moCustomOpMap   = null;
-
-        static private WonkaEth.Orchestration.Init.OrchestrationInitData moOrchInitData      = null;
-        static private WonkaEth.Init.WonkaEthRegistryInitialization      moWonkaRegistryInit = null;
-
-        #endregion
-
         /// <summary>
         /// 
         /// This method will return information about a RuleTree, if it exists within the cache.
@@ -132,6 +107,8 @@ namespace WonkaRestService.Controllers
 
             try
             {
+                Init();
+
                 if (RuleTreeData == null)
                     throw new Exception("ERROR!  No rule tree data was provided.");
 
@@ -154,8 +131,6 @@ namespace WonkaRestService.Controllers
                     if (bAnotherTreeWithOwner)
                         throw new Exception("ERROR!  Owner Name(" + RuleTreeData.OwnerName + ") already owns a tree and can only have one tree.");
                 }
-
-                Init();
 
                 WonkaBreRulesEngine NewRulesEngine = null;
 
@@ -315,199 +290,6 @@ namespace WonkaRestService.Controllers
         }
 
         #region Methods
-
-        private Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
-        {
-            var account = new Account(TargetSource.Password);
-
-            Nethereum.Web3.Web3 web3 = null;
-            if ((moOrchInitData != null) && !String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
-                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
-            else
-                web3 = new Nethereum.Web3.Web3(account);
-
-            var contract = web3.Eth.GetContract(TargetSource.ContractABI, TargetSource.ContractAddress);
-
-            return contract;
-        }
-
-        private string DeployOrchestrationContract()
-        {
-            string sOrchestrationContractAddress = "";
-
-            // NOTE: Yet to be implemented
-
-            return sOrchestrationContractAddress;
-        }
-
-        private void Init()
-        {
-            var TmpAssembly = Assembly.GetExecutingAssembly();
-
-            if (moMetadataSource == null)
-                moMetadataSource = new WonkaData.WonkaMetadataVATSource();
-
-            // Using the metadata source, we create an instance of a defined data domain
-            WonkaRefEnvironment RefEnv =
-                WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
-
-            if (moOrchInitData == null)
-            {
-                var DelegateMap =
-                    new Dictionary<string, WonkaBre.Readers.WonkaBreXmlReader.ExecuteCustomOperator>();
-
-                DelegateMap["lookupVATDenominator"] = InvokeController.LookupVATDenominator;
-
-                // Read the configuration file that contains all the initialization details regarding the rules engine 
-                // (like addresses of contracts, senders, passwords, etc.)
-                using (var XmlReader = new System.IO.StreamReader(TmpAssembly.GetManifestResourceStream("WonkaRestService.WonkaData.VATCalculationExample.init.xml")))
-                {
-                    string sInitXml = XmlReader.ReadToEnd();
-
-                    // We deserialize/parse the contents of the config file
-                    System.Xml.Serialization.XmlSerializer WonkaEthSerializer =
-                        new System.Xml.Serialization.XmlSerializer(typeof(WonkaEth.Init.WonkaEthInitialization),
-                                                                   new System.Xml.Serialization.XmlRootAttribute("WonkaEthInitialization"));
-
-                    WonkaEth.Init.WonkaEthInitialization WonkaInit =
-                        WonkaEthSerializer.Deserialize(new System.IO.StringReader(sInitXml)) as WonkaEth.Init.WonkaEthInitialization;
-
-                    // Here, any embeddeded resources mentioned in the config file (instead of simple file URLs) are accessed here
-                    WonkaInit.RetrieveEmbeddedResources(TmpAssembly);
-
-                    // The initialization data is transformed into a structure used by the WonkaEth namespace
-                    moOrchInitData = WonkaInit.TransformIntoOrchestrationInit(moMetadataSource, DelegateMap);
-                }
-
-                if (moWonkaRegistryInit == null)
-                {
-                    // Read the configuration file that contains all the initialization details regarding the rules registry
-                    // (like Ruletree info, Grove info, etc.) - this information will allow us to add our RuleTree to the 
-                    // Registry so that it can be discovered by users and so it can be added to a Grove (where it can be executed
-                    // as a member of a collection)
-                    using (var XmlReader = new System.IO.StreamReader(TmpAssembly.GetManifestResourceStream("WonkaRestService.WonkaData.WonkaRegistry.init.xml")))
-                    {
-                        string sInitRegistryXml = XmlReader.ReadToEnd();
-
-                        // We deserialize/parse the contents of the config file
-                        System.Xml.Serialization.XmlSerializer WonkaEthSerializer =
-                            new System.Xml.Serialization.XmlSerializer(typeof(WonkaEth.Init.WonkaEthRegistryInitialization),
-                                                                       new System.Xml.Serialization.XmlRootAttribute("WonkaEthRegistryInitialization"));
-
-                        moWonkaRegistryInit =
-                            WonkaEthSerializer.Deserialize(new System.IO.StringReader(sInitRegistryXml)) as WonkaEth.Init.WonkaEthRegistryInitialization;
-
-                        // Here, any embeddeded resources mentioned in the config file (instead of simple file URLs) are accessed here                
-                        moWonkaRegistryInit.RetrieveEmbeddedResources(TmpAssembly);
-                    }
-                }
-
-                if (String.IsNullOrEmpty(msSenderAddress))
-                {
-                    #region Set Class Member Variables
-                    msSenderAddress = moOrchInitData.BlockchainEngine.SenderAddress;
-                    msPassword = moOrchInitData.BlockchainEngine.Password;
-
-                    if (moOrchInitData.BlockchainEngine.ContractAddress == null)
-                        msWonkaContractAddress = InvokeController.DeployWonkaContract();
-                    else
-                        msWonkaContractAddress = moOrchInitData.BlockchainEngine.ContractAddress;
-
-                    if (moOrchInitData.DefaultBlockchainDataSource.ContractAddress == null)
-                        msOrchContractAddress = DeployOrchestrationContract();
-                    else
-                        msOrchContractAddress = moOrchInitData.DefaultBlockchainDataSource.ContractAddress;
-
-                    msAbiWonka = moOrchInitData.BlockchainEngine.ContractABI;
-                    msAbiOrchContract = moOrchInitData.DefaultBlockchainDataSource.ContractABI;
-
-                    moDefaultSource =
-                        new WonkaBreSource(moOrchInitData.DefaultBlockchainDataSource.SourceId,
-                                           moOrchInitData.DefaultBlockchainDataSource.SenderAddress,
-                                           moOrchInitData.DefaultBlockchainDataSource.Password,
-                                           moOrchInitData.DefaultBlockchainDataSource.ContractAddress,
-                                           moOrchInitData.DefaultBlockchainDataSource.ContractABI,
-                                           moOrchInitData.DefaultBlockchainDataSource.MethodName,
-                                           moOrchInitData.DefaultBlockchainDataSource.SetterMethodName,
-                                           RetrieveValueMethod);
-
-                    #endregion
-
-                    // Here a mapping is created, where each Attribute points to a specific contract and its "accessor" methods
-                    // - the class that contains this information (contract, accessors, etc.) is of the WonkaBreSource type
-                    foreach (WonkaRefAttr TempAttr in RefEnv.AttrCache)
-                    {
-                        moAttrSourceMap[TempAttr.AttrName] = moDefaultSource;
-                    }
-                }
-
-                if (moCustomOpMap == null)
-                {
-                    // These values indicate the Custom Operator "INVOKE_VAT_LOOKUP" which has been used in the markup - 
-                    // its implementation can be found in the method "lookupVATDenominator"
-                    msCustomOpId     = "INVOKE_VAT_LOOKUP";
-                    msCustomOpMethod = "lookupVATDenominator";
-
-                    // Here a mapping is created, where each Custom Operator points to a specific contract and its "implementation" method
-                    // - the class that contains this information (contract, accessors, etc.) is of the WonkaBreSource type    
-                    if ((moOrchInitData.BlockchainCustomOpFunctions != null) && (moOrchInitData.BlockchainCustomOpFunctions.Count() > 0))
-                        moCustomOpMap = moOrchInitData.BlockchainCustomOpFunctions;
-                    else
-                    {
-                        moCustomOpMap = new Dictionary<string, WonkaBreSource>();
-
-                        // Here a mapping is created, where each Custom Operator points to a specific contract and its "implementation" method
-                        // - the class that contains this information (contract, accessors, etc.) is of the WonkaBreSource type
-                        WonkaBreSource CustomOpSource =
-                            new WonkaBreSource(msCustomOpId, msSenderAddress, msPassword, msOrchContractAddress, msAbiOrchContract, InvokeController.LookupVATDenominator, msCustomOpMethod);
-
-                        moCustomOpMap[msCustomOpId] = CustomOpSource;
-                    }
-                }
-
-                if (mbInteractWithChain)
-                {
-                    WonkaEth.Contracts.WonkaRuleTreeRegistry WonkaRegistry =
-                        WonkaEth.Contracts.WonkaRuleTreeRegistry.CreateInstance(moWonkaRegistryInit.BlockchainRegistry.ContractSender,
-                                                                                moWonkaRegistryInit.BlockchainRegistry.ContractPassword,
-                                                                                moWonkaRegistryInit.BlockchainRegistry.ContractAddress,
-                                                                                moWonkaRegistryInit.BlockchainRegistry.ContractABI,
-                                                                                moWonkaRegistryInit.Web3HttpUrl);
-
-                    SerializeRefEnv();
-                }
-            }
-        }
-
-        private string RetrieveValueMethod(WonkaBre.RuleTree.WonkaBreSource poTargetSource, string psAttrName)
-        {
-            string sResult = "";
-
-            if (mbInteractWithChain)
-            {
-                try
-                {
-                    var contract = GetContract(poTargetSource);
-
-                    var getRecordValueFunction = contract.GetFunction(poTargetSource.MethodName);
-
-                    sResult = getRecordValueFunction.CallAsync<string>(psAttrName).Result;
-                }
-                catch (Exception ex)
-                {
-                    // NOTE: Should throw the exception here?
-                }
-            }
-
-            return sResult;
-        }
-
-        private void SerializeRefEnv()
-        {
-            WonkaRefEnvironment RefEnv = WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
-
-            RefEnv.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, moOrchInitData.Web3HttpUrl);
-        }
 
         #endregion
     }
