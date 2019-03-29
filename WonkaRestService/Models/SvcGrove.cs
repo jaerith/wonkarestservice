@@ -13,38 +13,62 @@ namespace WonkaRestService.Models
     {
         public SvcGrove()
         {
-            GroveId = GroveDescription = GroveOwner = ErrorMessage = null;
-
+            RuleGrove = 
+                new WonkaEth.Contracts.WonkaRuleGrove("blank") { GroveDescription = "", OwnerId = null };
+           
             RuleTreeMembers = new List<string>();
 
             CreationEpochTime = 0;
+
+            SerializeToBlockchain = false;
+
+            ErrorMessage = StackTraceMessage = null;
         }
 
         public SvcGrove(string psGroveId, string psGroveDesc = "")
         {
-            GroveId          = psGroveId; 
-            GroveDescription = psGroveDesc;
-
-            GroveOwner = ErrorMessage = null;
+            RuleGrove =
+                new WonkaEth.Contracts.WonkaRuleGrove(psGroveId) { GroveDescription = psGroveDesc, OwnerId = null };
 
             RuleTreeMembers = new List<string>();
 
             CreationEpochTime = 0;
+
+            SerializeToBlockchain = false;
+
+            ErrorMessage = StackTraceMessage = null;
         }
 
         #region Properties
 
-        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string GroveId { get; set; }
+        public WonkaEth.Contracts.WonkaRuleGrove RuleGrove { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string GroveDescription { get; set; }
+        public string GroveId
+        {
+            get { return RuleGrove.GroveId; }
+
+            set { RuleGrove.GroveId = value; }
+        }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string GroveDescription
+        {
+            get { return RuleGrove.GroveDescription; }
+
+            set { RuleGrove.GroveDescription = value; }
+        }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<string> RuleTreeMembers { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string GroveOwner { get; set; }
+        public string GroveOwner
+        {
+            get { return RuleGrove.OwnerId; }
+
+            set { RuleGrove.OwnerId = value; }
+        }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public uint CreationEpochTime { get; set; }
@@ -62,7 +86,13 @@ namespace WonkaRestService.Models
         }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool SerializeToBlockchain { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ErrorMessage { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string StackTraceMessage { get; set; }
 
         #endregion
 
