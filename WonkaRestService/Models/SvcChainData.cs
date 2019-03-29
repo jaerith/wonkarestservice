@@ -17,6 +17,7 @@ namespace WonkaRestService.Models
             AttrNum    = null;
             AttrValue  = null;
             Attributes = null;
+            Data       = null;
             Result     = null;
 
             ErrorMessage = StackTraceMessage = null;
@@ -32,6 +33,9 @@ namespace WonkaRestService.Models
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool? Result { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string Data { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string RuleTreeXml { get; set; }
