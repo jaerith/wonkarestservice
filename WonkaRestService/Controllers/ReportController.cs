@@ -9,12 +9,6 @@ namespace WonkaRestService.Controllers
 {
     public class ReportController : ApiController
     {
-        // GET: api/Report
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
         // GET: api/Report/5
         public string Get(int id)
         {
