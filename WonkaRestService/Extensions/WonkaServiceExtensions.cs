@@ -9,6 +9,7 @@ using Nethereum.ABI.Model;
 using Nethereum.Contracts;
 
 using WonkaBre;
+using WonkaEth.Extensions;
 using WonkaRef;
 using WonkaPrd;
 
@@ -39,6 +40,8 @@ namespace WonkaRestService.Extensions
     {
         #region CONSTANTS
 
+        public const string CONST_CONTRACT_FUNCTION_ADD_GROVE    = "addRuleGrove";
+        public const string CONST_CONTRACT_FUNCTION_ADD_TR_TO_GR = "addRuleTreeToGrove";
         public const string CONST_CONTRACT_FUNCTION_EXEC         = "execute"; 
         public const string CONST_CONTRACT_FUNCTION_EXEC_RPT     = "executeWithReport"; 
         public const string CONST_CONTRACT_FUNCTION_GET_LAST_RPT = "getLastRuleReport";
@@ -108,8 +111,6 @@ namespace WonkaRestService.Extensions
 
         public static RuleTreeReport InvokeWithReport(this SvcRuleTree poRuleTree, Contract poWonkaContract, string psWeb3HttpUrl = "")
         {
-            WonkaRefEnvironment RefEnv = WonkaRefEnvironment.GetInstance();
-
             var executeFunction              = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC);
             var executeWithReportFunction    = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC_RPT);
             var executeGetLastReportFunction = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_GET_LAST_RPT);
@@ -139,6 +140,55 @@ namespace WonkaRestService.Extensions
             ruleTreeReport = executeGetLastReportFunction.CallDeserializingToObjectAsync<RuleTreeReport>().Result;
 
             return ruleTreeReport;
+        }
+
+        public static void Serialize(this SvcGrove poGrove, WonkaEth.Init.WonkaEthSource poRegBlockchainData, string psWeb3HttpUrl = "")
+        {
+            if (poGrove.RuleTreeMembers != null)
+            {
+                // First, let's do a quick check
+                foreach (string sTmpRuleTreeId in poGrove.RuleTreeMembers)
+                {
+                    if (!WonkaServiceCache.GetInstance().RuleTreeOriginCache.ContainsKey(sTmpRuleTreeId))
+                        throw new Exception("ERROR!  Rule Tree (" + sTmpRuleTreeId + ") does not exist in the cache.");
+                }
+            }
+
+            var account = new Nethereum.Web3.Accounts.Account(poRegBlockchainData.ContractPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+            if (!String.IsNullOrEmpty(psWeb3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, psWeb3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            var contract = web3.Eth.GetContract(poRegBlockchainData.ContractABI, poRegBlockchainData.ContractAddress);
+
+            var addGroveFunction = contract.GetFunction(CONST_CONTRACT_FUNCTION_ADD_GROVE);
+
+            var gas = addGroveFunction.EstimateGasAsync(poGrove.GroveId, poGrove.GroveDescription, poRegBlockchainData.ContractSender, 123456).Result;
+
+            var receiptAddGrove =
+                addGroveFunction.SendTransactionAsync(poRegBlockchainData.ContractSender, 
+                                                      gas, 
+                                                      null, 
+                                                      poGrove.GroveId, 
+                                                      poGrove.GroveDescription, 
+                                                      poRegBlockchainData.ContractSender, 
+                                                      poGrove.CreationEpochTime).Result;
+
+            if (poGrove.RuleTreeMembers != null)
+            {
+                foreach (string sTmpRuleTreeId in poGrove.RuleTreeMembers)
+                {
+                    if (WonkaServiceCache.GetInstance().RuleTreeOriginCache.ContainsKey(sTmpRuleTreeId))
+                    {
+                        var FoundEngine = WonkaServiceCache.GetInstance().RuleTreeCache[sTmpRuleTreeId];
+
+                        FoundEngine.SerializeToGrove(contract, poRegBlockchainData.ContractSender, poGrove.GroveId, psWeb3HttpUrl);
+                    }
+                }
+            }
         }
 
         public static void SerializeProductData(this WonkaProduct poTargetProduct, WonkaBreRulesEngine poRulesEngine, string psWeb3HttpUrl = "")
@@ -171,9 +221,9 @@ namespace WonkaRestService.Extensions
 
         public static void SerializeProductData(this WonkaBre.RuleTree.WonkaBreSource poSource, string psAttrName, string psAttrValue, string psWeb3HttpUrl = "")
         {
-            var Contract = poSource.GetContract(psWeb3HttpUrl);
+            var contract = poSource.GetContract(psWeb3HttpUrl);
 
-            var setAttrFunction = Contract.GetFunction(poSource.SetterMethodName);
+            var setAttrFunction = contract.GetFunction(poSource.SetterMethodName);
 
             // NOTE: Caused exception to be thrown
             var gas = setAttrFunction.EstimateGasAsync(psAttrName, psAttrValue).Result;
@@ -181,6 +231,18 @@ namespace WonkaRestService.Extensions
 
             var result =
                 setAttrFunction.SendTransactionAsync(poSource.SenderAddress, gas, null, psAttrName, psAttrValue).Result;
+        }
+
+        public static void SerializeToGrove(this WonkaBreRulesEngine poTargetRuleTree, Contract poRegistryContract, string psSender, string psGroveId, string psWeb3HttpUrl = "")
+        {
+            var addTreeToGroveFunction = poRegistryContract.GetFunction(CONST_CONTRACT_FUNCTION_ADD_TR_TO_GR);
+
+            var RuleTreeChainId = poTargetRuleTree.DetermineRuleTreeChainID();
+
+            var gas = addTreeToGroveFunction.EstimateGasAsync(psGroveId, RuleTreeChainId).Result;
+
+            var result =
+                addTreeToGroveFunction.SendTransactionAsync(psSender, gas, null, psGroveId, RuleTreeChainId).Result;
         }
 
         public static void SetGroveData(this Dictionary<string, SvcGrove> poGroveCache, SvcRuleTree poTargetRuleTree)
