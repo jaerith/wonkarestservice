@@ -9,13 +9,7 @@ namespace WonkaRestService.Controllers
 {
     public class TrxStateConfirmController : ApiController
     {
-        // GET: api/TrxStateConfirm
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET: api/TrxStateConfirm/5
+        // GET: api/TrxState/RuleTreeId/Owner
         public string Get(int id)
         {
             return "value";
