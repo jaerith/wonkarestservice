@@ -24,11 +24,13 @@ namespace WonkaRestService.Controllers
     {
         #region CONSTANTS
 
-        public const string CONST_CHAIN_DATA_KEY_ATTRNUM = "attrnum";
-        public const string CONST_CHAIN_DATA_KEY_ATTRVAL = "attrval";
-        public const string CONST_CHAIN_DATA_KEY_GETGRV  = "getgrove";
-        public const string CONST_CHAIN_DATA_KEY_HASTREE = "hastree";
-        public const string CONST_CHAIN_DATA_KEY_RETVAL  = "retval";
+        public const string CONST_CHAIN_DATA_KEY_ATTRNUM  = "attrnum";
+        public const string CONST_CHAIN_DATA_KEY_ATTRVAL  = "attrval";
+        public const string CONST_CHAIN_DATA_KEY_ALLREGTR = "getallregtrees"; 
+        public const string CONST_CHAIN_DATA_KEY_GETGRV   = "getgrove";
+        public const string CONST_CHAIN_DATA_KEY_HASTREE  = "hastree";
+        public const string CONST_CHAIN_DATA_KEY_ISREGTR  = "istreereg";
+        public const string CONST_CHAIN_DATA_KEY_RETVAL   = "retval";
 
         public const string CONST_CHAIN_DATA_KEY_ORCHFLG = "orchflag";
         public const string CONST_CHAIN_DATA_KEY_ISSRCMP = "mapflag";
@@ -85,6 +87,10 @@ namespace WonkaRestService.Controllers
                     ChainData.Result = RetrieveAttrMapFlag(id);
                 else if (type == CONST_CHAIN_DATA_KEY_GETGRV)
                     ChainData.Data = RetrieveGroveData(id);
+                else if (type == CONST_CHAIN_DATA_KEY_ISREGTR)
+                    ChainData.Result = RetrieveIsTreeRegistered(id);
+                else if (type == CONST_CHAIN_DATA_KEY_ALLREGTR)
+                    ChainData.Data = RetrieveAllRegisteredTrees();                
 
                 response = Request.CreateResponse<SvcChainData>(HttpStatusCode.Created, ChainData);
             }
@@ -111,6 +117,43 @@ namespace WonkaRestService.Controllers
         }
 
         #region Private
+
+        protected Nethereum.Contracts.Contract GetRegistryContract()
+        {
+            var account = new Account(msPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            var contract = 
+                web3.Eth.GetContract(moWonkaRegistryInit.BlockchainRegistry.ContractABI, moWonkaRegistryInit.BlockchainRegistry.ContractAddress);
+
+            return contract;
+        }
+
+        private string RetrieveAllRegisteredTrees()
+        {
+            StringBuilder AllRegTrees = new StringBuilder();
+
+            var getAllRegTreesFunction = GetRegistryContract().GetFunction("getAllRegisteredRuleTrees");
+
+            var RegTreeList  = getAllRegTreesFunction.CallAsync<List<string>>().Result;
+
+            RegTreeList.ForEach(x => AllRegTrees.Append("|").Append(x));
+
+            string sAllRegTrees = "";
+            if (AllRegTrees.Length > 0)
+            {
+                sAllRegTrees = AllRegTrees.ToString();
+
+                sAllRegTrees = sAllRegTrees.Substring(1);
+            }
+
+            return sAllRegTrees;
+        }
 
         private bool RetrieveAttrMapFlag(string psAttrName)
         {
@@ -197,6 +240,18 @@ namespace WonkaRestService.Controllers
                 bResult = hasRuleTreeFunction.CallAsync<bool>(psOwnerAddress).Result;
             else
                 bResult = hasRuleTreeFunction.CallAsync<bool>(msSenderAddress).Result;
+
+            return bResult;
+        }
+
+        private bool RetrieveIsTreeRegistered(string psRuleTreeId)
+        {
+            bool bResult = false;
+
+            var isTreeRegisteredFunction = GetRegistryContract().GetFunction("isRuleTreeRegistered");
+
+            if (!String.IsNullOrEmpty(psRuleTreeId))
+                bResult = isTreeRegisteredFunction.CallAsync<bool>(psRuleTreeId).Result;
 
             return bResult;
         }
