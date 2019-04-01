@@ -149,6 +149,8 @@ namespace WonkaRestService.Controllers
                     if (moAttrSourceMap.Count > 0)
                         NewRulesEngine.DefaultSource = moAttrSourceMap.Values.Where(x => !String.IsNullOrEmpty(x.SourceId)).FirstOrDefault().SourceId;
 
+                    NewRulesEngine.RegistrationId = RuleTreeData.RuleTreeId;
+
                     NewRulesEngine.RuleTreeRoot.Description = "Root" + RuleTreeData.RuleTreeId;
 
                     ServiceCache.RuleTreeCache[RuleTreeData.RuleTreeId]       = NewRulesEngine;
