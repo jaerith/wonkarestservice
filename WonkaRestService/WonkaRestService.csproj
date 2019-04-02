@@ -342,6 +342,7 @@
     <Compile Include="Models\SvcGrove.cs" />
     <Compile Include="Models\SvcRuleTree.cs" />
     <Compile Include="Models\SvcRuleTreeOwner.cs" />
+    <Compile Include="Models\SvcRuleTreeRegistry.cs" />
     <Compile Include="Models\SvcRuleTreeReport.cs" />
     <Compile Include="Models\SvcTrxState.cs" />
     <Compile Include="Models\SvcTrxStateOwner.cs" />
