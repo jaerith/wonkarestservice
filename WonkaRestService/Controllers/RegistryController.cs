@@ -14,18 +14,18 @@ namespace WonkaRestService.Controllers
     {
         /// <summary>
         /// 
-        /// This method will return information about a Grove, if it exists within the cache.
+        /// This method will return information about a RuleTree from the Registry.
         /// 
-        /// GET: api/Registry/GroveId
+        /// GET: api/Registry/RuleTreeId
         /// 
-        /// <param name="RuleTreeId">The ID of the Grove</param>
-        /// <returns>Contains the Response with the Grove (or an error message if an error occurs)</returns>
+        /// <param name="RuleTreeId">The ID of the RuleTree</param>
+        /// <returns>Contains the Response with the Registry data (or an error message if an error occurs)</returns>
         /// </summary>
-        public HttpResponseMessage GetGrove(string GroveId)
+        public HttpResponseMessage GetTreeRegistry(string RuleTreeId)
         {
-            SvcGrove Grove = new SvcGrove();
+            SvcRuleTreeRegistry RegistryData = new SvcRuleTreeRegistry();
 
-            var response = Request.CreateResponse<SvcGrove>(HttpStatusCode.OK, Grove);
+            var response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.OK, RegistryData);
 
             string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
 
@@ -33,86 +33,21 @@ namespace WonkaRestService.Controllers
 
             try
             {
+                // NOTE: Do work here
 
-                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
-
-                if (ServiceCache.GroveRegistryCache.ContainsKey(GroveId))
-                    Grove = ServiceCache.GroveRegistryCache[GroveId];
-
-                response = Request.CreateResponse<SvcGrove>(HttpStatusCode.Created, Grove);
+                response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.OK, RegistryData);
             }
             catch (Exception ex)
             {
-                string sErrorMsg = String.Format("ERROR!  Registry (Grove) web method -> Error Message : {0}",
+                string sErrorMsg = String.Format("ERROR!  Registry (Tree) web method -> Error Message : {0}",
                                                  ex.ToString());
 
                 if ((ex.InnerException != null) && (ex.InnerException.Message != null))
-                    Grove.ErrorMessage = ex.InnerException.Message;
+                    RegistryData.ErrorMessage = ex.InnerException.Message;
                 else if (!String.IsNullOrEmpty(ex.Message))
-                    Grove.ErrorMessage = ex.Message;
+                    RegistryData.ErrorMessage = ex.Message;
 
-                response = Request.CreateResponse<SvcGrove>(HttpStatusCode.BadRequest, Grove);
-
-                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        /// 
-        /// This method will provide the information to create a Grove, afterwards then inserting it within the cache.
-        /// 
-        /// POST: api/RuleTree/GroveData
-        /// 
-        /// TEST PAYLOAD: 
-        /// 
-        /// {
-        ///   "GroveId":"VATCalculateClub",
-        ///   "GroveDescription":"Grove of Precheck RuleTrees",
-        ///   "RuleTreeMembers":["VATPrecheckExample1","VATPrecheckExample2"],
-        ///   CreationEpochTime":0
-        /// }
-        /// 
-        /// <param name="GroveData">The data needed to instantiate the Grove</param>
-        /// <returns>Contains the Response with the Grove (or an error message if an error occurs)</returns>
-        /// </summary>
-        public HttpResponseMessage PostGrove(SvcGrove GroveData)
-        {
-            var response = Request.CreateResponse<SvcGrove>(HttpStatusCode.Created, GroveData);
-
-            string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
-
-            response.Headers.Location = new Uri(uri);
-
-            try
-            {
-                if (GroveData == null)
-                    throw new Exception("ERROR!  No grove data was provided.");
-
-                if (!GroveData.IsValid())
-                    throw new Exception("ERROR!  Invalid rule tree data was provided.");
-
-                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
-
-                if (ServiceCache.GroveRegistryCache.ContainsKey(GroveData.GroveId))
-                    throw new Exception("ERROR!  Grove with ID already exists.");
-
-                ServiceCache.GroveRegistryCache[GroveData.GroveId] = GroveData;
-
-                response = Request.CreateResponse<SvcGrove>(HttpStatusCode.Created, GroveData);
-            }
-            catch (Exception ex)
-            {
-                string sErrorMsg = String.Format("ERROR!  Registry (Grove) web method -> Error Message : {0}",
-                                                 ex.ToString());
-
-                if ((ex.InnerException != null) && (ex.InnerException.Message != null))
-                    GroveData.ErrorMessage = ex.InnerException.Message;
-                else if (!String.IsNullOrEmpty(ex.Message))
-                    GroveData.ErrorMessage = ex.Message;
-
-                response = Request.CreateResponse<SvcGrove>(HttpStatusCode.BadRequest, GroveData);
+                response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.BadRequest, RegistryData);
 
                 Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
@@ -121,26 +56,30 @@ namespace WonkaRestService.Controllers
         }
 
         /*
-        // PUT: api/Registry/5
-        public void Put(int id, [FromBody]string value)
+        public HttpResponseMessage PostTreeRegistry(SvcRuleTreeRegistry RegistryData)
         {
+            var response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.Created, RegistryData);
+
+            string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
+
+            response.Headers.Location = new Uri(uri);
+
+            return response;
         }
         */
 
         /// <summary>
         /// 
-        /// This method will remove a Grove identified by the GroveId.
+        /// This method will update information about a RuleTree in the Registry.
         /// 
-        /// DELETE: api/Registry/GroveId
+        /// GET: api/Registry/RuleTreeId
         /// 
-        /// <param name="GroveId">The ID of the Grove</param>
-        /// <returns>Contains the Response with the GroveId</returns>
+        /// <param name="RuleTreeId">The ID of the RuleTree</param>
+        /// <returns>Contains the Response with the Registry data (or an error message if an error occurs)</returns>
         /// </summary>
-        public HttpResponseMessage DeleteGrove(string GroveId)
+        public HttpResponseMessage PutTreeRegistry(SvcRuleTreeRegistry poRegistryData)
         {
-            SvcGrove Grove = new SvcGrove(GroveId);
-
-            var response = Request.CreateResponse<SvcGrove>(HttpStatusCode.OK, Grove);
+            var response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.Accepted, poRegistryData);
 
             string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
 
@@ -148,33 +87,64 @@ namespace WonkaRestService.Controllers
 
             try
             {
-                WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
+                // NOTE: Do work here
 
-                if (String.IsNullOrEmpty(GroveId))
-                    throw new Exception("ERROR!  Grove Id was not provided.");
-
-                if (ServiceCache.GroveRegistryCache.ContainsKey(GroveId))
-                {
-                    Grove = ServiceCache.GroveRegistryCache[GroveId];
-
-                    ServiceCache.GroveRegistryCache.Remove(GroveId);
-                }
-                else
-                    throw new Exception("ERROR!  Grove (" + GroveId + ") does not exist.");
-
-                response = Request.CreateResponse<SvcGrove>(HttpStatusCode.Created, Grove);
+                response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.Accepted, poRegistryData);
             }
             catch (Exception ex)
             {
-                string sErrorMsg = String.Format("ERROR!  Registry (Grove) web method -> Error Message : {0}",
+                string sErrorMsg = String.Format("ERROR!  Registry (Tree) web method -> Error Message : {0}",
                                                  ex.ToString());
 
                 if ((ex.InnerException != null) && (ex.InnerException.Message != null))
-                    Grove.ErrorMessage = ex.InnerException.Message;
+                    poRegistryData.ErrorMessage = ex.InnerException.Message;
                 else if (!String.IsNullOrEmpty(ex.Message))
-                    Grove.ErrorMessage = ex.Message;
+                    poRegistryData.ErrorMessage = ex.Message;
 
-                response = Request.CreateResponse<SvcGrove>(HttpStatusCode.BadRequest, Grove);
+                response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.BadRequest, poRegistryData);
+
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// 
+        /// This method will remove a RuleTree from the Registry.
+        /// 
+        /// DELETE: api/Registry/RegistryData
+        /// 
+        /// <param name="RuleTreeId">The ID of the RuleTree</param>
+        /// <returns>Contains the Response with the RuleTreeId</returns>
+        /// </summary>
+        public HttpResponseMessage DeleteTreeRegistry(string RuleTreeId)
+        {
+            SvcRuleTreeRegistry RegistryData = new SvcRuleTreeRegistry(RuleTreeId);
+
+            var response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.OK, RegistryData);
+
+            string uri = Url.Link("DefaultApi", new { id = "DefaultValue" });
+
+            response.Headers.Location = new Uri(uri);
+
+            try
+            {
+                // NOTE: Do work here
+
+                response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.OK, RegistryData);
+            }
+            catch (Exception ex)
+            {
+                string sErrorMsg = String.Format("ERROR!  Registry (Tree) web method -> Error Message : {0}",
+                                                 ex.ToString());
+
+                if ((ex.InnerException != null) && (ex.InnerException.Message != null))
+                    RegistryData.ErrorMessage = ex.InnerException.Message;
+                else if (!String.IsNullOrEmpty(ex.Message))
+                    RegistryData.ErrorMessage = ex.Message;
+
+                response = Request.CreateResponse<SvcRuleTreeRegistry>(HttpStatusCode.BadRequest, RegistryData);
 
                 Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
