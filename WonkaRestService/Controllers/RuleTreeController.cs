@@ -170,25 +170,27 @@ namespace WonkaRestService.Controllers
                     {
                         SerializeRefEnv();
 
+                        string sTreeOwnerAddress = msSenderAddress;
+
                         if (!String.IsNullOrEmpty(RuleTreeData.OwnerName) && ServiceCache.TreeOwnerCache.ContainsKey(RuleTreeData.OwnerName))
                         {
                             SvcRuleTreeOwner RTOwner = ServiceCache.TreeOwnerCache[RuleTreeData.OwnerName];
 
-                            NewRulesEngine.Serialize(RTOwner.OwnerAddress,
-                                                     RTOwner.OwnerPassword,
-                                                     msWonkaContractAddress,
-                                                     msAbiWonka,
-                                                     moOrchInitData.TrxStateContractAddress,
-                                                     moOrchInitData.Web3HttpUrl);
+                            if (!String.IsNullOrEmpty(RTOwner.OwnerAddress))
+                                sTreeOwnerAddress = RTOwner.OwnerAddress;
                         }
-                        else
+
+                        NewRulesEngine.Serialize(msRuleMasterAddress, 
+                                                 msPassword,
+                                                 sTreeOwnerAddress,
+                                                 msWonkaContractAddress, 
+                                                 msAbiWonka, 
+                                                 (NewRulesEngine.TransactionState != null) ? moOrchInitData.TrxStateContractAddress : null,
+                                                 moOrchInitData.Web3HttpUrl);
+
+                        if (NewRulesEngine.TransactionState != null)
                         {
-                            NewRulesEngine.Serialize(msSenderAddress, 
-                                                     msPassword, 
-                                                     msWonkaContractAddress, 
-                                                     msAbiWonka, 
-                                                     moOrchInitData.TrxStateContractAddress, 
-                                                     moOrchInitData.Web3HttpUrl);
+                            // NOTE: Serialize TrxState data to the TrxStateContract
                         }
                     }
 
