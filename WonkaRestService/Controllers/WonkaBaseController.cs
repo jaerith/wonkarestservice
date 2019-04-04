@@ -27,6 +27,7 @@ namespace WonkaRestService.Controllers
 
         #endregion 
 
+        static protected string msRuleMasterAddress    = "";
         static protected string msSenderAddress        = "";
         static protected string msPassword             = "";
         static protected string msWonkaContractAddress = "";
@@ -60,6 +61,21 @@ namespace WonkaRestService.Controllers
                 web3 = new Nethereum.Web3.Web3(account);
 
             var contract = web3.Eth.GetContract(TargetSource.ContractABI, TargetSource.ContractAddress);
+
+            return contract;
+        }
+
+        public static Nethereum.Contracts.Contract GetAltContract(string psSenderAddr, string psPassword, string psContractAbi, string psContractAddr, string psWeb3HttpUrl = "")
+        {
+            var account = new Account(psPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+            if (!String.IsNullOrEmpty(psWeb3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, psWeb3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            var contract = web3.Eth.GetContract(psContractAbi, psContractAddr);
 
             return contract;
         }
@@ -177,8 +193,9 @@ namespace WonkaRestService.Controllers
                 if (String.IsNullOrEmpty(msSenderAddress))
                 {
                     #region Set Class Member Variables
-                    msSenderAddress = moOrchInitData.BlockchainEngine.SenderAddress;
-                    msPassword = moOrchInitData.BlockchainEngine.Password;
+                    msRuleMasterAddress = moOrchInitData.BlockchainEngineOwner;
+                    msSenderAddress     = moOrchInitData.BlockchainEngine.SenderAddress;
+                    msPassword          = moOrchInitData.BlockchainEngine.Password;
 
                     if (moOrchInitData.BlockchainEngine.ContractAddress == null)
                         msWonkaContractAddress = InvokeController.DeployWonkaContract();
@@ -278,7 +295,7 @@ namespace WonkaRestService.Controllers
         {
             WonkaRefEnvironment RefEnv = WonkaRefEnvironment.CreateInstance(false, moMetadataSource);
 
-            RefEnv.Serialize(msSenderAddress, msPassword, msWonkaContractAddress, msAbiWonka, moOrchInitData.Web3HttpUrl);
+            RefEnv.Serialize(msRuleMasterAddress, msPassword, msSenderAddress, msWonkaContractAddress, msAbiWonka, moOrchInitData.Web3HttpUrl);
         }
 
     }
