@@ -295,9 +295,23 @@ namespace WonkaRestService.Controllers
 
         private WonkaBre.Reporting.WonkaBreRuleTreeReport ExecuteEthereum(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData, WonkaBreRulesEngine RulesEngine)
         {
+            Nethereum.Contracts.Contract WonkaContract = null;
+
             WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = new WonkaBre.Reporting.WonkaBreRuleTreeReport();
 
-            var BlockchainReport = RuleTreeOriginData.InvokeWithReport(GetWonkaContract(), moOrchInitData.Web3HttpUrl);
+            if (!String.IsNullOrEmpty(RuleTreeOriginData.OwnerName) && WonkaServiceCache.GetInstance().TreeOwnerCache.ContainsKey(RuleTreeOriginData.OwnerName))
+            {
+                string sInvokeSender   = WonkaServiceCache.GetInstance().TreeOwnerCache[RuleTreeOriginData.OwnerName].OwnerAddress;
+                string sInvokePassword = WonkaServiceCache.GetInstance().TreeOwnerCache[RuleTreeOriginData.OwnerName].OwnerPassword;
+
+                WonkaContract = WonkaBaseController.GetAltContract(sInvokeSender, sInvokePassword, msAbiWonka, msWonkaContractAddress, moOrchInitData.Web3HttpUrl);                
+            }
+            else
+            {
+                WonkaContract = GetWonkaContract();
+            }
+
+            var BlockchainReport = RuleTreeOriginData.InvokeWithReport(WonkaContract, moOrchInitData.BlockchainEngineOwner);
 
             if (BlockchainReport != null)
             {
