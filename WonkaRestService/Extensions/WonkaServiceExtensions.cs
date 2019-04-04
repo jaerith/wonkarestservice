@@ -109,12 +109,8 @@ namespace WonkaRestService.Extensions
             return contract;
         }
 
-        public static RuleTreeReport InvokeWithReport(this SvcRuleTree poRuleTree, Contract poWonkaContract, string psWeb3HttpUrl = "")
+        public static RuleTreeReport InvokeWithReport(this SvcRuleTree poRuleTree, Contract poWonkaContract, string psWonkaOwnerAddress = "")
         {
-            var executeFunction              = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC);
-            var executeWithReportFunction    = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC_RPT);
-            var executeGetLastReportFunction = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_GET_LAST_RPT);
-
             RuleTreeReport ruleTreeReport = null;
 
             string sRuleTreeOwnerAddress = "";
@@ -124,8 +120,12 @@ namespace WonkaRestService.Extensions
             else
             {
                 // NOTE: Should probably default to another value or throw an exception here
-                sRuleTreeOwnerAddress = poRuleTree.AttributeSources[0].BlockchainSenderAddress;
+                sRuleTreeOwnerAddress = psWonkaOwnerAddress;
             }
+
+            var executeFunction              = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC);
+            var executeWithReportFunction    = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_EXEC_RPT);
+            var executeGetLastReportFunction = poWonkaContract.GetFunction(CONST_CONTRACT_FUNCTION_GET_LAST_RPT);
 
             // NOTE: Caused exception to be thrown
             // var gas = executeWithReportFunction.EstimateGasAsync(msSenderAddress).Result;
