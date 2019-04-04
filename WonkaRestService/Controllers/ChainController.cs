@@ -236,7 +236,7 @@ namespace WonkaRestService.Controllers
 
             var hasRuleTreeFunction = GetWonkaContract().GetFunction("hasRuleTree");
 
-            if (!String.IsNullOrEmpty(psOwnerAddress) && moAttrSourceMap.ContainsKey(psOwnerAddress))
+            if (!String.IsNullOrEmpty(psOwnerAddress))
                 bResult = hasRuleTreeFunction.CallAsync<bool>(psOwnerAddress).Result;
             else
                 bResult = hasRuleTreeFunction.CallAsync<bool>(msSenderAddress).Result;
