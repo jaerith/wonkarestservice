@@ -14,11 +14,17 @@ namespace WonkaRestService.Models
     [DataContract(Namespace = "http://wonkarestservice.com")]
     public class SvcTrxState : WonkaBreTransactionState
     {
+        #region CONSTANTS
+
+        public const string DUMMY_VALUE = "Blank";
+
+        #endregion
+
         /**
          ** NOTE: Empty constructor is needed for deserialization
          **/
         public SvcTrxState() :
-            base(new HashSet<string>(){"Blank"}, 0, "")
+            base(new HashSet<string>(){ DUMMY_VALUE }, 0, "")
         {
             SerializeToBlockchain = null;
 
@@ -122,6 +128,9 @@ namespace WonkaRestService.Models
 
         public void RefreshSvcOwnerList()
         {
+            if (base.IsOwner(DUMMY_VALUE))
+                base.RemoveOwner(DUMMY_VALUE);
+
             if (Owners != null)
             {
                 var ServiceCache = Cache.WonkaServiceCache.GetInstance();
@@ -136,17 +145,14 @@ namespace WonkaRestService.Models
                     else if (!sTrxOwner.HasHexPrefix())
                         throw new Exception("ERROR!  The provided owner(" + sTrxOwner + ") is not an blockchain address, nor is it a lookup value.");
 
-                    this.SetOwner(TmpOwner.OwnerName, TmpOwner.OwnerWeight);
+                    this.SetOwner(sTrxOwner, TmpOwner.OwnerWeight);
 
                     if (TmpOwner.ConfirmedTransaction)
-                        this.AddConfirmation(TmpOwner.OwnerName);
+                        this.AddConfirmation(sTrxOwner);
                 }
             }
             else
             {
-                if (base.IsOwner("Blank"))
-                    base.RemoveOwner("Blank");
-
                 Owners = new List<SvcTrxStateOwner>();
 
                 foreach (string TmpConfirmedOwner in base.GetOwnersConfirmed())
