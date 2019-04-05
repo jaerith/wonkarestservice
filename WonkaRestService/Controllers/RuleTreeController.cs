@@ -190,7 +190,12 @@ namespace WonkaRestService.Controllers
 
                         if (NewRulesEngine.TransactionState != null)
                         {
-                            // NOTE: Serialize TrxState data to the TrxStateContract
+                            NewRulesEngine.TransactionState.Serialize(GetWonkaContract(), 
+                                                                      msRuleMasterAddress, 
+                                                                      msPassword, 
+                                                                      msSenderAddress, 
+                                                                      moOrchInitData.TrxStateContractAddress, 
+                                                                      moOrchInitData.Web3HttpUrl);
                         }
                     }
 

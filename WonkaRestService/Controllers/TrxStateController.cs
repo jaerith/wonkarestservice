@@ -6,13 +6,14 @@ using System.Net.Http;
 using System.Web.Http;
 
 using WonkaBre;
+using WonkaEth.Extensions;
 
 using WonkaRestService.Cache;
 using WonkaRestService.Models;
 
 namespace WonkaRestService.Controllers
 {
-    public class TrxStateController : ApiController
+    public class TrxStateController : WonkaBaseController
     {
         /// <summary>
         /// 
@@ -120,6 +121,11 @@ namespace WonkaRestService.Controllers
 
             try
             {
+                bool bSerializeToBlockchain = 
+                    ((TrxState.SerializeToBlockchain != null) && ((bool)(TrxState.SerializeToBlockchain)));
+
+                Init();
+
                 if (TrxState == null)
                     throw new Exception("ERROR!  No transaction state was provided.");
 
@@ -129,7 +135,6 @@ namespace WonkaRestService.Controllers
                 TrxState.RefreshSvcOwnerList();
 
                 string sTargetRuleTreeId = TrxState.RuleTreeId;
-                //    (!String.IsNullOrEmpty(TrxState.RuleTreeId)) ? TrxState.RuleTreeId : InvokeController.CONST_RULES_RESOURCE_STREAM;
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
@@ -138,7 +143,17 @@ namespace WonkaRestService.Controllers
                 {
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];
 
-                    RulesEngine.TransactionState = TrxState;
+                    RulesEngine.TransactionState = TrxState;                    
+
+                    if (bSerializeToBlockchain)
+                    {                       
+                        RulesEngine.TransactionState.Serialize(GetWonkaContract(),
+                                                               msRuleMasterAddress,
+                                                               msPassword,
+                                                               msSenderAddress,
+                                                               moOrchInitData.TrxStateContractAddress,
+                                                               moOrchInitData.Web3HttpUrl);
+                    }
                 }
 
                 response = Request.CreateResponse<SvcTrxState>(HttpStatusCode.Created, TrxState);
@@ -152,6 +167,8 @@ namespace WonkaRestService.Controllers
                     TrxState.ErrorMessage = ex.InnerException.Message;
                 else if (!String.IsNullOrEmpty(ex.Message))
                     TrxState.ErrorMessage = ex.Message;
+
+                TrxState.StackTraceMessage = ex.StackTrace;
 
                 response = Request.CreateResponse<SvcTrxState>(HttpStatusCode.BadRequest, TrxState);
 
