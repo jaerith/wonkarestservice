@@ -5,6 +5,8 @@ using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 
+using Nethereum.Hex.HexConvertors.Extensions;
+
 using WonkaBre.Permissions;
 
 namespace WonkaRestService.Models
@@ -18,9 +20,11 @@ namespace WonkaRestService.Models
         public SvcTrxState() :
             base(new HashSet<string>(){"Blank"}, 0, "")
         {
+            SerializeToBlockchain = null;
+
             RuleTreeId = "";
 
-            ErrorMessage = null;
+            ErrorMessage = StackTraceMessage = null;
 
             Owners = null;
         }
@@ -28,9 +32,11 @@ namespace WonkaRestService.Models
         public SvcTrxState(IEnumerable<string> poOwners, uint pnMinReqScoreForApproval = 0, string psContractAddress = null) :
             base(poOwners, pnMinReqScoreForApproval, psContractAddress)
         {
+            SerializeToBlockchain = null;
+
             RuleTreeId = "";
 
-            ErrorMessage = null;
+            ErrorMessage = StackTraceMessage = null;
 
             Owners = null;
         }
@@ -38,9 +44,11 @@ namespace WonkaRestService.Models
         public SvcTrxState(string psRulesEngineId, WonkaBreTransactionState poTrxState, HashSet<string> poAllOwners) :
             base(poAllOwners, poTrxState.GetMinScoreRequirement(), poTrxState.ContractAddress)
         {
+            SerializeToBlockchain = null;
+
             RuleTreeId = psRulesEngineId;
 
-            ErrorMessage = null;
+            ErrorMessage = StackTraceMessage = null;
 
             Owners = null;
 
@@ -69,9 +77,6 @@ namespace WonkaRestService.Models
         }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string ErrorMessage { get; set; }
-
-        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public uint MinimumScore
         {
             get
@@ -92,6 +97,15 @@ namespace WonkaRestService.Models
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string RuleTreeId { get; set; }
 
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool? SerializeToBlockchain { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string ErrorMessage { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string StackTraceMessage { get; set; }
+
         #endregion
 
         #region Methods
@@ -110,8 +124,18 @@ namespace WonkaRestService.Models
         {
             if (Owners != null)
             {
+                var ServiceCache = Cache.WonkaServiceCache.GetInstance();
+
                 foreach (SvcTrxStateOwner TmpOwner in Owners)
                 {
+                    string sTrxOwner = TmpOwner.OwnerName;
+
+                    // We need to convert these user-friendly name to addresses/hashes, so that we can serialize the state to the chain
+                    if (ServiceCache.TreeOwnerCache.ContainsKey(sTrxOwner))
+                        sTrxOwner = ServiceCache.TreeOwnerCache[sTrxOwner].OwnerAddress;
+                    else if (!sTrxOwner.HasHexPrefix())
+                        throw new Exception("ERROR!  The provided owner(" + sTrxOwner + ") is not an blockchain address, nor is it a lookup value.");
+
                     this.SetOwner(TmpOwner.OwnerName, TmpOwner.OwnerWeight);
 
                     if (TmpOwner.ConfirmedTransaction)
