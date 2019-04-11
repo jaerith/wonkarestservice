@@ -182,7 +182,14 @@ namespace WonkaRestService.Controllers
 
                             WonkaRecord = poRecord.TransformToWonkaProduct();
 
-                            RuleTreeReport = ExecuteEthereum(WonkaRecord, RuleTreeOriginData, ServiceCache.RuleTreeCache[sRuleTreeId]);
+                            var SvcReport = ExecuteEthereum(WonkaRecord, RuleTreeOriginData, ServiceCache.RuleTreeCache[sRuleTreeId]);
+                            RuleTreeReport = SvcReport;
+
+                            // NOTE: We only cache the reports when we invoke a RuleTree on the chain
+                            if (!ServiceCache.ReportCache.ContainsKey(sRuleTreeId))
+                                ServiceCache.ReportCache[sRuleTreeId] = new List<SvcRuleTreeReport>();
+
+                            ServiceCache.ReportCache[sRuleTreeId].Add(SvcReport);
                         }
                     }
 
@@ -293,24 +300,39 @@ namespace WonkaRestService.Controllers
             return RuleTreeReport;
         }
 
-        private WonkaBre.Reporting.WonkaBreRuleTreeReport ExecuteEthereum(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData, WonkaBreRulesEngine RulesEngine)
+        private SvcRuleTreeReport ExecuteEthereum(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData, WonkaBreRulesEngine RulesEngine)
         {
             Nethereum.Contracts.Contract WonkaContract = null;
 
-            WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = new WonkaBre.Reporting.WonkaBreRuleTreeReport();
+            SvcRuleTreeReport RuleTreeReport = new SvcRuleTreeReport(false);
+
+            WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
+
+            string sInvokeSender   = null;
+            string sInvokePassword = null;
 
             if (!String.IsNullOrEmpty(RuleTreeOriginData.OwnerName) && WonkaServiceCache.GetInstance().TreeOwnerCache.ContainsKey(RuleTreeOriginData.OwnerName))
             {
-                string sInvokeSender   = WonkaServiceCache.GetInstance().TreeOwnerCache[RuleTreeOriginData.OwnerName].OwnerAddress;
-                string sInvokePassword = WonkaServiceCache.GetInstance().TreeOwnerCache[RuleTreeOriginData.OwnerName].OwnerPassword;
+                sInvokeSender   = ServiceCache.TreeOwnerCache[RuleTreeOriginData.OwnerName].OwnerAddress;
+                sInvokePassword = ServiceCache.TreeOwnerCache[RuleTreeOriginData.OwnerName].OwnerPassword;
 
                 WonkaContract = WonkaBaseController.GetAltContract(sInvokeSender, sInvokePassword, msAbiWonka, msWonkaContractAddress, moOrchInitData.Web3HttpUrl);                
             }
             else
             {
+                sInvokeSender   = msSenderAddress;
+                sInvokePassword = msPassword;
+
                 WonkaContract = GetWonkaContract();
             }
 
+            var BlockchainReport = RulesEngine.InvokeOnChain(WonkaContract, sInvokeSender);
+            if (BlockchainReport != null)
+                RuleTreeReport = new SvcRuleTreeReport(false, BlockchainReport);
+
+            /**
+             ** OLD WAY
+             **
             var BlockchainReport = RuleTreeOriginData.InvokeWithReport(WonkaContract, moOrchInitData.BlockchainEngineOwner);
 
             if (BlockchainReport != null)
@@ -327,6 +349,7 @@ namespace WonkaRestService.Controllers
                         RuleTreeReport.LastRuleSetExecuted = new WonkaBreRuleSet(nRuleSetId);
                 }
             }
+             **/
 
             NewRecord.DeserializeProductData(RulesEngine, moOrchInitData.Web3HttpUrl);
 
