@@ -183,6 +183,9 @@ namespace WonkaRestService.Controllers
                             WonkaRecord = poRecord.TransformToWonkaProduct();
 
                             var SvcReport = ExecuteEthereum(WonkaRecord, RuleTreeOriginData, ServiceCache.RuleTreeCache[sRuleTreeId]);
+                            SvcReport.RecordData = BasicRecord.RecordData;
+
+                            // We only return the base class WonkaBreRuleTreeReport to the caller here
                             RuleTreeReport = SvcReport;
 
                             // NOTE: We only cache the reports when we invoke a RuleTree on the chain
