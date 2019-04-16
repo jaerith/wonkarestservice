@@ -16,7 +16,7 @@ namespace WonkaRestService.Models
             RuleGrove = 
                 new WonkaEth.Contracts.WonkaRuleGrove("blank") { GroveDescription = "", OwnerId = null };
            
-            RuleTreeMembers = new List<string>();
+            RuleTreeMembers = new HashSet<string>();
 
             CreationEpochTime = 0;
 
@@ -30,7 +30,7 @@ namespace WonkaRestService.Models
             RuleGrove =
                 new WonkaEth.Contracts.WonkaRuleGrove(psGroveId) { GroveDescription = psGroveDesc, OwnerId = null };
 
-            RuleTreeMembers = new List<string>();
+            RuleTreeMembers = new HashSet<string>();
 
             CreationEpochTime = 0;
 
@@ -60,7 +60,7 @@ namespace WonkaRestService.Models
         }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public List<string> RuleTreeMembers { get; set; }
+        public HashSet<string> RuleTreeMembers { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string GroveOwner
