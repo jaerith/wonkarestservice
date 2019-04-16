@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 
 using WonkaBre.Reporting;
 
+using WonkaRestService.Extensions;
+
 namespace WonkaRestService.Models
 {
     public class SvcRuleTreeReport : WonkaBreRuleTreeReport
@@ -96,6 +98,18 @@ namespace WonkaRestService.Models
             {
                 if (moChainReport != null)
                     return moChainReport.RuleSetFailures;
+                else
+                    return null;
+            }
+        }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public Hashtable RuleSetFailMessages
+        {
+            get
+            {
+                if (moChainReport != null)
+                    return moChainReport.RuleSetFailMessages.TransformToTrxRecord();
                 else
                     return null;
             }
