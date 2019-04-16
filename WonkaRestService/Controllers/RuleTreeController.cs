@@ -32,7 +32,7 @@ namespace WonkaRestService.Controllers
         /// <param name="RuleTreeId">The ID of the RuleTree</param>
         /// <returns>Contains the Response with the RuleTree (or an error message if an error occurs)</returns>
         /// </summary>
-        public HttpResponseMessage GetRuleTree(string RuleTreeId)
+        public HttpResponseMessage GetRuleTree(string RuleTreeId, bool ExportMode = false)
         {
             SvcRuleTree RuleTree = new SvcRuleTree();
 
@@ -54,6 +54,7 @@ namespace WonkaRestService.Controllers
                 {
                     RuleTree.RuleTreeId = RuleTreeId;
 
+                    // In the case that the caller wants to export the info about the RuleTree 
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];
                     if (RulesEngine != null)
                         RuleTree.RulesEngine = RulesEngine;
@@ -61,10 +62,27 @@ namespace WonkaRestService.Controllers
                     RuleTree.RuleTreeOriginUrl =
                         ServiceCache.RuleTreeOriginCache.ContainsKey(RuleTreeId) ? ServiceCache.RuleTreeOriginCache[RuleTreeId].RuleTreeOriginUrl : "";
 
-                    ServiceCache.GroveRegistryCache.SetGroveData(RuleTree);
+                    // NOTE: This section may not be the best solution
+                    // ServiceCache.GroveRegistryCache.SetGroveData(RuleTree);
                 }
 
-                response = Request.CreateResponse<SvcRuleTree>(HttpStatusCode.Created, RuleTree);
+
+                // In the case that the caller wants to export the RuleTree (in XML form) from the chain
+                if (ExportMode)
+                {
+                    var ExportedXml = ExportRuleTreeXml(RuleTree.RulesEngine);
+
+                    if (!String.IsNullOrEmpty(ExportedXml))
+                        response = Request.CreateResponse<string>(HttpStatusCode.OK, ExportedXml);
+                    else
+                    {
+                        RuleTree.ErrorMessage =
+                            "ERROR!  No registry item found for RuleTree(" + sTargetRuleTreeId + ")";
+                    }
+                }
+                // In the case that the user just wants the general data about the RuleTree
+                else 
+                    response = Request.CreateResponse<SvcRuleTree>(HttpStatusCode.Created, RuleTree);
             }
             catch (Exception ex)
             {
@@ -138,13 +156,18 @@ namespace WonkaRestService.Controllers
                 {
                     string sRuleTreeContents = client.DownloadString(RuleTreeData.RuleTreeOriginUrl);
 
-                    bool bAddToRegistry = false;
+                    bool   bAddToRegistry = false;
+                    bool   bAddToGrove    = false;
+                    string sOrigGroveId   = RuleTreeData.GroveId;
 
                     if (!String.IsNullOrEmpty(RuleTreeData.GroveId))
                         bAddToRegistry = true;
 
                     NewRulesEngine =
                         new WonkaBreRulesEngine(new StringBuilder(sRuleTreeContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, bAddToRegistry);
+
+                    NewRulesEngine.GroveId    = RuleTreeData.GroveId;
+                    NewRulesEngine.GroveIndex = RuleTreeData.GroveIndex;
 
                     if (moAttrSourceMap.Count > 0)
                         NewRulesEngine.DefaultSource = moAttrSourceMap.Values.Where(x => !String.IsNullOrEmpty(x.SourceId)).FirstOrDefault().SourceId;
@@ -159,9 +182,12 @@ namespace WonkaRestService.Controllers
                     if (!String.IsNullOrEmpty(RuleTreeData.GroveId))
                     {
                         if (!ServiceCache.GroveRegistryCache.ContainsKey(RuleTreeData.GroveId))
+                        {
+                            // NOTE: For now, we will allow this, but later, we will remove it and throw an error instead
                             ServiceCache.GroveRegistryCache[RuleTreeData.GroveId] = new SvcGrove(RuleTreeData.GroveId);
+                        }
 
-                        ServiceCache.GroveRegistryCache[RuleTreeData.GroveId].RuleTreeMembers.Add(RuleTreeData.RuleTreeId);
+                        bAddToGrove = true;
                     }
 
                     RuleTreeData.RulesEngine = NewRulesEngine;
@@ -187,6 +213,18 @@ namespace WonkaRestService.Controllers
                                                  msAbiWonka, 
                                                  (NewRulesEngine.TransactionState != null) ? moOrchInitData.TrxStateContractAddress : null,
                                                  moOrchInitData.Web3HttpUrl);
+
+                        if (bAddToGrove)
+                        {
+                            if (ServiceCache.GroveRegistryCache.ContainsKey(RuleTreeData.GroveId))
+                            {
+                                NewRulesEngine.SerializeToGrove(GetRegistryContract(), sTreeOwnerAddress, RuleTreeData.GroveId, moOrchInitData.Web3HttpUrl);
+
+                                ServiceCache.GroveRegistryCache[RuleTreeData.GroveId].RuleTreeMembers.Add(RuleTreeData.RuleTreeId);
+                            }
+                            else
+                                throw new Exception("ERROR!  Grove Id(" + RuleTreeData.GroveId + ") isn't in the cache yet?!");
+                        }
 
                         if (NewRulesEngine.TransactionState != null)
                         {
@@ -299,6 +337,28 @@ namespace WonkaRestService.Controllers
         }
 
         #region Methods
+
+        protected string ExportRuleTreeXml(WonkaBreRulesEngine poEngine)
+        {
+            string sRuleTreeXml = "";
+
+            WonkaEth.Contracts.WonkaRuleGrove NewSaleGrove = new WonkaEth.Contracts.WonkaRuleGrove(poEngine.GroveId);
+            NewSaleGrove.PopulateFromRegistry(msAbiWonka);
+
+            if (NewSaleGrove.OrderedRuleTrees.Count <= 0)
+                throw new Exception("ERROR!  No trees pulled from registry for GroveId(" + poEngine.GroveId + ")");
+
+            var RegistryItem =
+                NewSaleGrove.OrderedRuleTrees.Where(x => x.RuleTreeId == poEngine.DetermineRuleTreeChainID()).FirstOrDefault();
+
+            if (String.IsNullOrEmpty(RegistryItem.RuleTreeId))
+                throw new Exception("ERROR!  No tree found from registry for GroveId(" + poEngine.GroveId + ") matching RuleTree(" + poEngine.DetermineRuleTreeChainID() + ").");
+
+            // Assemble the XML string by extracting data from the rules engine on the chain
+            sRuleTreeXml = RegistryItem.ExportXmlString(moOrchInitData.Web3HttpUrl);
+
+            return sRuleTreeXml;
+        }
 
         #endregion
     }
