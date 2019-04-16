@@ -50,6 +50,16 @@ namespace WonkaRestService.Controllers
 
         protected bool mbInteractWithChain = true;
 
+        public static uint ConvertToUnixTimestamp(DateTime date)
+        {
+            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            TimeSpan diff = date.ToUniversalTime() - origin;
+
+            var dEpochTime = Math.Floor(diff.TotalSeconds);
+
+            return Convert.ToUInt32(dEpochTime);
+        }
+
         protected Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
         {
             var account = new Account(TargetSource.Password);
@@ -91,6 +101,22 @@ namespace WonkaRestService.Controllers
                 web3 = new Nethereum.Web3.Web3(account);
 
             var contract = web3.Eth.GetContract(msAbiOrchContract, msOrchContractAddress);
+
+            return contract;
+        }
+
+        protected Nethereum.Contracts.Contract GetRegistryContract()
+        {
+            var account = new Account(msPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, moWonkaRegistryInit.Web3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            var contract = 
+                web3.Eth.GetContract(moWonkaRegistryInit.BlockchainRegistry.ContractABI, moWonkaRegistryInit.BlockchainRegistry.ContractAddress);
 
             return contract;
         }
