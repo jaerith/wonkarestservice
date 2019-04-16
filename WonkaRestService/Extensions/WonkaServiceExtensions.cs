@@ -166,7 +166,7 @@ namespace WonkaRestService.Extensions
 
             var addGroveFunction = contract.GetFunction(CONST_CONTRACT_FUNCTION_ADD_GROVE);
 
-            var gas = addGroveFunction.EstimateGasAsync(poGrove.GroveId, poGrove.GroveDescription, poRegBlockchainData.ContractSender, 123456).Result;
+            var gas = addGroveFunction.EstimateGasAsync(poGrove.GroveId, poGrove.GroveDescription, poRegBlockchainData.ContractSender, poGrove.CreationEpochTime).Result;
 
             var receiptAddGrove =
                 addGroveFunction.SendTransactionAsync(poRegBlockchainData.ContractSender, 
@@ -245,6 +245,14 @@ namespace WonkaRestService.Extensions
                 addTreeToGroveFunction.SendTransactionAsync(psSender, gas, null, psGroveId, RuleTreeChainId).Result;
         }
 
+        public static void SetAttribute(this WonkaProduct poTargetProduct, WonkaRefAttr poTargetAttr, string psTargetValue)
+        {
+            if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId).GetRowCount() <= 0)
+                poTargetProduct.GetProductGroup(poTargetAttr.GroupId).AppendRow();
+
+            poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0][poTargetAttr.AttrId] = psTargetValue;
+        }
+
         public static void SetGroveData(this Dictionary<string, SvcGrove> poGroveCache, SvcRuleTree poTargetRuleTree)
         {
             string sGroveId =
@@ -252,21 +260,13 @@ namespace WonkaRestService.Extensions
 
             if (!String.IsNullOrEmpty(sGroveId))
             {
-                List<string> GroveTreeList = poGroveCache[sGroveId].RuleTreeMembers;
+                List<string> GroveTreeList = poGroveCache[sGroveId].RuleTreeMembers.ToList();
                 if ((GroveTreeList != null) && (GroveTreeList.Count > 0))
                 {
                     poTargetRuleTree.GroveId    = sGroveId;
                     poTargetRuleTree.GroveIndex = (uint) GroveTreeList.IndexOf(poTargetRuleTree.RuleTreeId);
                 }
             }
-        }
-
-        public static void SetAttribute(this WonkaProduct poTargetProduct, WonkaRefAttr poTargetAttr, string psTargetValue)
-        {
-            if (poTargetProduct.GetProductGroup(poTargetAttr.GroupId).GetRowCount() <= 0)
-                poTargetProduct.GetProductGroup(poTargetAttr.GroupId).AppendRow();
-
-            poTargetProduct.GetProductGroup(poTargetAttr.GroupId)[0][poTargetAttr.AttrId] = psTargetValue;
         }
 
         public static Hashtable TransformToTrxRecord(this IDictionary<string, string> poRecord)
