@@ -99,6 +99,8 @@ namespace WonkaRestService.Controllers
 
                 Init();
 
+                GroveData.CreationEpochTime = ConvertToUnixTimestamp(DateTime.Now);
+
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
                 if (ServiceCache.GroveRegistryCache.ContainsKey(GroveData.GroveId))
