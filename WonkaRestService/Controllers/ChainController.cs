@@ -28,6 +28,7 @@ namespace WonkaRestService.Controllers
         public const string CONST_CHAIN_DATA_KEY_ATTRVAL  = "attrval";
         public const string CONST_CHAIN_DATA_KEY_ALLREGTR = "getallregtrees"; 
         public const string CONST_CHAIN_DATA_KEY_GETGRV   = "getgrove";
+        public const string CONST_CHAIN_DATA_KEY_GETGRVDC = "getgrovedesc";
         public const string CONST_CHAIN_DATA_KEY_HASTREE  = "hastree";
         public const string CONST_CHAIN_DATA_KEY_ISREGTR  = "istreereg";
         public const string CONST_CHAIN_DATA_KEY_RETVAL   = "retval";
@@ -90,7 +91,9 @@ namespace WonkaRestService.Controllers
                 else if (type == CONST_CHAIN_DATA_KEY_ISREGTR)
                     ChainData.Result = RetrieveIsTreeRegistered(id);
                 else if (type == CONST_CHAIN_DATA_KEY_ALLREGTR)
-                    ChainData.Data = RetrieveAllRegisteredTrees();                
+                    ChainData.Data = RetrieveAllRegisteredTrees();
+                else if (type == CONST_CHAIN_DATA_KEY_GETGRVDC)
+                    ChainData.Data = RetrieveGroveDesc(id);                
 
                 response = Request.CreateResponse<SvcChainData>(HttpStatusCode.Created, ChainData);
             }
@@ -197,10 +200,11 @@ namespace WonkaRestService.Controllers
         {
             StringBuilder GroveDataBuilder = new StringBuilder();
 
+            /*
             if (!String.IsNullOrEmpty(psGroveId) && WonkaServiceCache.GetInstance().GroveRegistryCache.ContainsKey(psGroveId))
             {
                 WonkaEth.Contracts.WonkaRuleGrove RuleGrove = new WonkaEth.Contracts.WonkaRuleGrove(psGroveId);
-
+                
                 RuleGrove.PopulateFromRegistry(msAbiWonka);
 
                 GroveDataBuilder.Append(RuleGrove.GroveId);
@@ -223,6 +227,52 @@ namespace WonkaRestService.Controllers
                         GroveDataBuilder.Append(TmpRegTree.RuleTreeId);
                     }                        
                 }
+            }
+            */
+
+            if (!String.IsNullOrEmpty(psGroveId))
+            {
+                var getRuleGroveFunction = GetRegistryContract().GetFunction("getRuleGrove");
+                var groveRegistryInfo = getRuleGroveFunction.CallDeserializingToObjectAsync<RuleGroveRegistryData>(psGroveId).Result;
+
+                GroveDataBuilder.Append(psGroveId);
+
+                if (!String.IsNullOrEmpty(groveRegistryInfo.RuleGroveDescription))
+                    GroveDataBuilder.Append("|").Append(groveRegistryInfo.RuleGroveDescription);
+
+                if (groveRegistryInfo.RuleTreeMembers.Count > 0)
+                {
+                    GroveDataBuilder.Append("|");
+
+                    bool bPrependComma = false;
+                    foreach (string TmpRegTree in groveRegistryInfo.RuleTreeMembers)
+                    {
+                        if (bPrependComma)
+                            GroveDataBuilder.Append(",");
+                        else
+                            bPrependComma = true;
+
+                        GroveDataBuilder.Append(TmpRegTree);
+                    }
+                }
+            }
+            else
+                GroveDataBuilder.Append("GROVE NOT VALID");
+
+            return GroveDataBuilder.ToString();
+        }
+
+        private string RetrieveGroveDesc(string psGroveId)
+        {
+            StringBuilder GroveDataBuilder = new StringBuilder();
+
+            if (!String.IsNullOrEmpty(psGroveId))
+            {
+                var getRuleGroveDescFunction = GetRegistryContract().GetFunction("getRuleGroveDesc");
+
+                var groveDesc = getRuleGroveDescFunction.CallAsync<string>(psGroveId).Result;
+
+                GroveDataBuilder.Append(groveDesc);
             }
             else
                 GroveDataBuilder.Append("GROVE NOT VALID");
