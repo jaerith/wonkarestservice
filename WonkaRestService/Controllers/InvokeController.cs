@@ -331,28 +331,17 @@ namespace WonkaRestService.Controllers
 
             var BlockchainReport = RulesEngine.InvokeOnChain(WonkaContract, sInvokeSender);
             if (BlockchainReport != null)
+            {
                 RuleTreeReport = new SvcRuleTreeReport(false, BlockchainReport);
 
-            /**
-             ** OLD WAY
-             **
-            var BlockchainReport = RuleTreeOriginData.InvokeWithReport(WonkaContract, moOrchInitData.BlockchainEngineOwner);
-
-            if (BlockchainReport != null)
-            {
-                if (BlockchainReport.NumberOfRuleFailures > 0)
-                    RuleTreeReport.OverallRuleTreeResult = ERR_CD.CD_FAILURE;
-                else
-                    RuleTreeReport.OverallRuleTreeResult = ERR_CD.CD_SUCCESS;
-
-                if ((BlockchainReport.RuleSetIds != null) && (BlockchainReport.RuleSetIds.Count > 0))
+                if (!String.IsNullOrEmpty(BlockchainReport.TransactionHash))
                 {
-                    int nRuleSetId = 0;
-                    if (Int32.TryParse(BlockchainReport.RuleSetIds.Last(), out nRuleSetId))
-                        RuleTreeReport.LastRuleSetExecuted = new WonkaBreRuleSet(nRuleSetId);
+                    var receipt =
+                        GetWeb3().Eth.Transactions.GetTransactionReceipt.SendRequestAsync(BlockchainReport.TransactionHash).Result;
+
+                    RuleTreeReport.ExecutionGasCost = (uint) receipt.CumulativeGasUsed.Value;
                 }
             }
-             **/
 
             NewRecord.DeserializeProductData(RulesEngine, moOrchInitData.Web3HttpUrl);
 
@@ -475,19 +464,18 @@ namespace WonkaRestService.Controllers
             WonkaServiceExtensions.SetAttribute(NewSaleProduct, NewVATAmountForHRMCAttr, "0");
         }
 
-        private Nethereum.Contracts.Contract GetWonkaContract()
+        private Nethereum.Web3.Web3 GetWeb3()
         {
+            Nethereum.Web3.Web3 web3 = null;
+
             var account = new Account(msPassword);
 
-            Nethereum.Web3.Web3 web3 = null;
             if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
                 web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
             else
                 web3 = new Nethereum.Web3.Web3(account);
 
-            var contract = web3.Eth.GetContract(msAbiWonka, msWonkaContractAddress);
-
-            return contract;
+            return web3;
         }
 
         public static string LookupVATDenominator(string psSaleItemType, string psCountryOfSale, string psDummyVal1, string psDummyVal2)
