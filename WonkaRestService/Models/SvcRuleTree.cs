@@ -25,6 +25,8 @@ namespace WonkaRestService.Models
             msGroveId  = null;
             mnGroveIdx = 0;
 
+            MinGasCost = MaxGasCost = null;
+
             SerializeToBlockchain = false;
         }
 
@@ -38,6 +40,8 @@ namespace WonkaRestService.Models
 
             msGroveId  = null;
             mnGroveIdx = 0;
+
+            MinGasCost = MaxGasCost = null;
 
             SerializeToBlockchain = false;
         }
@@ -150,6 +154,12 @@ namespace WonkaRestService.Models
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string RuleTreeOriginUrl { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public uint? MinGasCost { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public uint? MaxGasCost { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool SerializeToBlockchain { get; set; }
