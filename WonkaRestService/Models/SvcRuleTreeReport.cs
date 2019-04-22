@@ -25,6 +25,8 @@ namespace WonkaRestService.Models
             moChainReport = null;
 
             InvocationTime = DateTime.Now;
+
+            ExecutionGasCost = null;
         }
 
         public SvcRuleTreeReport(bool pbSimulationMode, WonkaEth.Extensions.RuleTreeReport poChainReport, bool pbSerializeAllInfo = false)
@@ -36,6 +38,8 @@ namespace WonkaRestService.Models
             mbSerializeAllInfo = pbSerializeAllInfo;
 
             InvocationTime = DateTime.Now;
+
+            ExecutionGasCost = null;
         }
 
         #region Properties
@@ -123,6 +127,9 @@ namespace WonkaRestService.Models
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public DateTime InvocationTime { get; set; }
+
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public uint? ExecutionGasCost { get; set; }
 
         #endregion
 
