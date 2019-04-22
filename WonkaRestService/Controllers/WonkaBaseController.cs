@@ -107,7 +107,7 @@ namespace WonkaRestService.Controllers
 
         protected Nethereum.Contracts.Contract GetRegistryContract()
         {
-            var account = new Account(msPassword);
+            var account = new Account(moWonkaRegistryInit.BlockchainRegistry.ContractPassword);
 
             Nethereum.Web3.Web3 web3 = null;
             if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
