@@ -40,6 +40,9 @@ namespace WonkaRestService.Extensions
     {
         #region CONSTANTS
 
+        public const int CONST_GAS_PER_READ_OP  = 50000;
+        public const int CONST_GAS_PER_WRITE_OP = 80000;
+
         public const string CONST_CONTRACT_FUNCTION_ADD_GROVE    = "addRuleGrove";
         public const string CONST_CONTRACT_FUNCTION_ADD_TR_TO_GR = "addRuleTreeToGrove";
         public const string CONST_CONTRACT_FUNCTION_EXEC         = "execute"; 
@@ -48,6 +51,35 @@ namespace WonkaRestService.Extensions
         public const string CONST_CONTRACT_FUNCTION_HAS_RT       = "hasRuleTree";
 
         #endregion
+
+        public static void CalculateGasEstimates(this SvcRuleTree poRuleTree)
+        {
+            uint nMinGasCost = 0;
+            uint nMaxGasCost = 0;
+
+            if ((poRuleTree.RulesEngine != null) && (poRuleTree.RulesEngine.RuleTreeRoot != null))
+            {
+                // NOTE: Do work here
+                // 63200 gas per op, based on gas default price
+                // 12 ops for Validate, 18 ops Calculate
+
+                if (poRuleTree.RulesEngine.RuleTreeRoot.ChildRuleSets != null)
+                {
+                    poRuleTree.RulesEngine.RuleTreeRoot.ChildRuleSets.ForEach(x => nMinGasCost += (uint)(x.EvaluativeRules.Count * CONST_GAS_PER_READ_OP));
+                    poRuleTree.RulesEngine.RuleTreeRoot.ChildRuleSets.ForEach(x => nMinGasCost += (uint)(x.AssertiveRules.Count * CONST_GAS_PER_WRITE_OP));
+                }
+
+                if (poRuleTree.RulesEngine.AllRuleSets != null)
+                {
+                    poRuleTree.RulesEngine.AllRuleSets.ForEach(x => nMaxGasCost += (uint)(x.EvaluativeRules.Count * CONST_GAS_PER_READ_OP));
+                    poRuleTree.RulesEngine.AllRuleSets.ForEach(x => nMaxGasCost += (uint)(x.AssertiveRules.Count * CONST_GAS_PER_WRITE_OP));
+                }
+            }
+
+
+            poRuleTree.MinGasCost = nMinGasCost;
+            poRuleTree.MaxGasCost = nMaxGasCost;
+        }
 
         public static void DeserializeProductData(this WonkaProduct poTargetProduct, WonkaBreRulesEngine poRulesEngine, string psWeb3HttpUrl = "")
         {
