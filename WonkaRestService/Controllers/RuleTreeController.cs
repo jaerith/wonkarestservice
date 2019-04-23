@@ -192,6 +192,8 @@ namespace WonkaRestService.Controllers
 
                     RuleTreeData.RulesEngine = NewRulesEngine;
 
+                    RuleTreeData.CalculateGasEstimates();
+
                     if (RuleTreeData.SerializeToBlockchain)
                     {
                         SerializeRefEnv();
@@ -218,7 +220,9 @@ namespace WonkaRestService.Controllers
                         {
                             if (ServiceCache.GroveRegistryCache.ContainsKey(RuleTreeData.GroveId))
                             {
-                                NewRulesEngine.SerializeToGrove(GetRegistryContract(), sTreeOwnerAddress, RuleTreeData.GroveId, moOrchInitData.Web3HttpUrl);
+                                var RegistryOwnerAddress = moWonkaRegistryInit.BlockchainRegistry.ContractSender;
+
+                                NewRulesEngine.SerializeToGrove(GetRegistryContract(), RegistryOwnerAddress, RuleTreeData.GroveId, moOrchInitData.Web3HttpUrl);
 
                                 ServiceCache.GroveRegistryCache[RuleTreeData.GroveId].RuleTreeMembers.Add(RuleTreeData.RuleTreeId);
                             }
