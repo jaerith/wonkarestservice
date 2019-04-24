@@ -1,0 +1,8 @@
+﻿{
+  "GroveId": "NewSaleGroup",
+  "RuleTreeId": "RuleTreeExample",
+  "OwnerName": "NumberTwo",
+  "RuleTreeOriginUrl": "https://wonkarules.yourwebsite.com/ruletree.xml",
+  "UsingOrchestrationMode": true,
+  "SerializeToBlockchain": true
+}

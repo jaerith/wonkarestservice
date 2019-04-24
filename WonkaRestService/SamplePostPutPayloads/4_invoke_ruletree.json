@@ -1,0 +1,7 @@
+﻿{
+  "RuleTreeId": "RuleTreeExample",
+  "NewSaleEAN": "9781234567890",
+  "NewSaleItemType": "Widget",
+  "CountryOfSale": "UK",
+  "NewSalesTransSeq": "123456789"
+}

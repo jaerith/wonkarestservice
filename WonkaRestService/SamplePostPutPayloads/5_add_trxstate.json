@@ -1,0 +1,13 @@
+﻿{
+  "RuleTreeId": "RuleTreeExample",
+  "MinimumScore": 1,
+  "Owners": [
+    {
+      "OwnerName": "NumberTwo",
+      "ConfirmedTransaction": true,
+      "OwnerWeight": 100
+    }
+  ],
+  "ApprovedExecutors": [ "0x7aba3df73d31904178512d36fbbe324464184730" ],
+  "SerializeToBlockchain": true
+}
