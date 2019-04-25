@@ -40,8 +40,8 @@ namespace WonkaRestService.Extensions
     {
         #region CONSTANTS
 
-        public const int CONST_GAS_PER_READ_OP  = 50000;
-        public const int CONST_GAS_PER_WRITE_OP = 80000;
+        public const int CONST_GAS_PER_READ_OP  = 80000;
+        public const int CONST_GAS_PER_WRITE_OP = 125000;
 
         public const string CONST_CONTRACT_FUNCTION_ADD_GROVE    = "addRuleGrove";
         public const string CONST_CONTRACT_FUNCTION_ADD_TR_TO_GR = "addRuleTreeToGrove";
@@ -54,8 +54,8 @@ namespace WonkaRestService.Extensions
 
         public static void CalculateGasEstimates(this SvcRuleTree poRuleTree)
         {
-            uint nMinGasCost = 0;
-            uint nMaxGasCost = 0;
+            uint nMinGasCost = 50000;
+            uint nMaxGasCost = 50000;
 
             if ((poRuleTree.RulesEngine != null) && (poRuleTree.RulesEngine.RuleTreeRoot != null))
             {
@@ -72,7 +72,19 @@ namespace WonkaRestService.Extensions
                 if (poRuleTree.RulesEngine.AllRuleSets != null)
                 {
                     poRuleTree.RulesEngine.AllRuleSets.ForEach(x => nMaxGasCost += (uint)(x.EvaluativeRules.Count * CONST_GAS_PER_READ_OP));
-                    poRuleTree.RulesEngine.AllRuleSets.ForEach(x => nMaxGasCost += (uint)(x.AssertiveRules.Count * CONST_GAS_PER_WRITE_OP));
+                    // poRuleTree.RulesEngine.AllRuleSets.ForEach(x => nMaxGasCost += (uint)(x.AssertiveRules.Count * CONST_GAS_PER_WRITE_OP));
+
+
+                    foreach (WonkaBre.RuleTree.WonkaBreRuleSet TempRuleSet in poRuleTree.RulesEngine.AllRuleSets)
+                    {
+                        foreach (WonkaBre.RuleTree.WonkaBreRule TempRule in TempRuleSet.AssertiveRules)
+                        {
+                            if (TempRule.RuleType == RULE_TYPE.RT_CUSTOM_OP)
+                                nMaxGasCost += (uint)(3 * CONST_GAS_PER_WRITE_OP);
+                            else
+                                nMaxGasCost += (uint)(CONST_GAS_PER_WRITE_OP);
+                        }
+                    }
                 }
             }
 
