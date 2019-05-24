@@ -20,7 +20,7 @@ namespace WonkaRestService.Controllers
         /// <param name="OnlyWithErrors">Indicates whether or not only reports with errors should be returned</param>
         /// <returns>Contains the Response with the list of reports that were created by RuleTreeId</returns>
         /// </summary>
-        public HttpResponseMessage Get(string RuleTreeId, bool OnlyWithErrors = false)
+        public HttpResponseMessage Get(string RuleTreeId = null, string GroveId = null, bool OnlyWithErrors = false)
         {
             List<SvcRuleTreeReport> RuleTreeReports = new List<SvcRuleTreeReport>();
 
@@ -34,12 +34,39 @@ namespace WonkaRestService.Controllers
             {
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                if (ServiceCache.RuleTreeCache.ContainsKey(RuleTreeId))
+                if (String.IsNullOrEmpty(RuleTreeId) && String.IsNullOrEmpty(GroveId))
+                    throw new Exception("ERROR!  Neither a RuleTree ID nor a Grove ID was provided.");
+
+                if (!String.IsNullOrEmpty(RuleTreeId))
                 {
+                    if (ServiceCache.RuleTreeCache.ContainsKey(RuleTreeId))
+                    {
+                        if (OnlyWithErrors)
+                            RuleTreeReports = ServiceCache.ReportCache[RuleTreeId].Where(x => x.RuleSetsWithFailures.Count > 0).ToList();
+                        else
+                            RuleTreeReports = ServiceCache.ReportCache[RuleTreeId];
+                    }
+                    else if (RuleTreeId == "TEST")
+                    {
+                        SvcRuleTreeReport TestReport =
+                            new SvcRuleTreeReport(false) { InvocationTime = DateTime.Now, ExecutionGasCost = 1111111, OverallRuleTreeResult = 0 };
+
+                        TestReport.RecordData = new System.Collections.Hashtable();
+                        TestReport.RecordData["RuleTreeId"] = "TestTree";
+                        TestReport.RecordData["TestKey"]    = "TestValue";
+
+                        RuleTreeReports.Add(TestReport);
+                    }
+                }
+                else if (!String.IsNullOrEmpty(GroveId))
+                {
+                    var AllGroveReports = 
+                        ServiceCache.ReportCache.Where(x => ServiceCache.RuleTreeCache[x.Key].GroveId == GroveId).ToList();
+
+                    AllGroveReports.ForEach(x => RuleTreeReports.AddRange(x.Value));
+
                     if (OnlyWithErrors)
-                        RuleTreeReports = ServiceCache.ReportCache[RuleTreeId].Where(x => x.RuleSetsWithFailures.Count > 0).ToList();
-                    else
-                        RuleTreeReports = ServiceCache.ReportCache[RuleTreeId];
+                        RuleTreeReports = RuleTreeReports.Where(x => x.RuleSetsWithFailures.Count > 0).ToList();
                 }
 
                 response = Request.CreateResponse<List<SvcRuleTreeReport>>(HttpStatusCode.Created, RuleTreeReports);
