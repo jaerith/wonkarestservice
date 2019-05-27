@@ -25,6 +25,7 @@ namespace WonkaRestService.Cache
 
         private WonkaServiceCache()
         {
+            MarkupCache         = new Dictionary<string, string>();
             RuleTreeCache       = new Dictionary<string, WonkaBreRulesEngine>();
             RuleTreeOriginCache = new Dictionary<string, SvcRuleTree>();
             GroveRegistryCache  = new Dictionary<string, SvcGrove>();
@@ -50,6 +51,8 @@ namespace WonkaRestService.Cache
         #region Properties 
 
         // NOTE: There is currently no locking for these variables, and that will need to be implemented eventually
+
+        public Dictionary<string, string> MarkupCache { get; set; }
 
         public Dictionary<string, WonkaBreRulesEngine> RuleTreeCache { get; set; }
 
