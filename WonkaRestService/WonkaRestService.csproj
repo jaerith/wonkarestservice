@@ -315,6 +315,7 @@
     <Compile Include="Controllers\GroveController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\InvokeController.cs" />
+    <Compile Include="Controllers\MarkupController.cs" />
     <Compile Include="Controllers\RegistryController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\RuleTreeController.cs" />
