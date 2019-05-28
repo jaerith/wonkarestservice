@@ -18,7 +18,12 @@ namespace WonkaRestService.Controllers
 
         public const string CONST_MARKUP_DEFAULT_URL_PREFIX = "http://localwonkacache/";
 
+        public const string CONST_LAST_MARKUP_GEN_KEY_IND = "LastMarkupGenKey";
+
         #endregion
+
+        // Yes, yes, obviously this is not thread-safe
+        public static string LastGeneratedMarkupKey = "";
 
         /// <summary>
         /// 
@@ -43,7 +48,9 @@ namespace WonkaRestService.Controllers
             {
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                if (ServiceCache.MarkupCache.ContainsKey(MarkupId))
+                if (MarkupId == CONST_LAST_MARKUP_GEN_KEY_IND)
+                    sRuleTreeMarkup = LastGeneratedMarkupKey;
+                else if (ServiceCache.MarkupCache.ContainsKey(MarkupId))
                     sRuleTreeMarkup = ServiceCache.MarkupCache[MarkupId];
 
                 response = Request.CreateResponse<string>(HttpStatusCode.OK, sRuleTreeMarkup);
@@ -94,7 +101,7 @@ namespace WonkaRestService.Controllers
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                sNewMarkupId = CONST_MARKUP_DEFAULT_URL_PREFIX + Guid.NewGuid().ToString();
+                sNewMarkupId = LastGeneratedMarkupKey = CONST_MARKUP_DEFAULT_URL_PREFIX + Guid.NewGuid().ToString();
 
                 ServiceCache.MarkupCache[sNewMarkupId] = sMarkupXml;
 
