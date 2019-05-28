@@ -154,9 +154,14 @@ namespace WonkaRestService.Controllers
 
                 using (WebClient client = new WebClient())
                 {
-                    string sRuleTreeContents = client.DownloadString(RuleTreeData.RuleTreeOriginUrl);
+                    string sRuleTreeContents = "";
 
-                    bool   bAddToRegistry = false;
+                    if (RuleTreeData.RuleTreeOriginUrl.StartsWith(MarkupController.CONST_MARKUP_DEFAULT_URL_PREFIX))
+                        sRuleTreeContents = ServiceCache.MarkupCache[RuleTreeData.RuleTreeOriginUrl];
+                    else
+                        sRuleTreeContents = client.DownloadString(RuleTreeData.RuleTreeOriginUrl);
+
+                    bool bAddToRegistry   = false;
                     bool   bAddToGrove    = false;
                     string sOrigGroveId   = RuleTreeData.GroveId;
 
