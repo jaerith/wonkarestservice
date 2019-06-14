@@ -46,6 +46,24 @@ namespace WonkaRestService.Models
             SerializeToBlockchain = false;
         }
 
+        public SvcRuleTree(SvcRuleTree poOriginal)
+        {
+            RuleTreeId        = poOriginal.RuleTreeId;
+            RulesEngine       = null;
+            RuleTreeOriginUrl = poOriginal.RuleTreeOriginUrl;
+            OwnerName         = poOriginal.OwnerName;
+            ErrorMessage      = null;
+
+
+            msGroveId  = poOriginal.GroveId;
+            mnGroveIdx = poOriginal.GroveIndex;
+
+            MinGasCost = poOriginal.MinGasCost;
+            MaxGasCost = poOriginal.MaxGasCost;
+
+            SerializeToBlockchain = false;
+        }
+
         #region Properties
 
         public WonkaBreRulesEngine RulesEngine { get; set; }

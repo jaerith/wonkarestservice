@@ -52,20 +52,19 @@ namespace WonkaRestService.Controllers
                 WonkaBreRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {
-                    RuleTree.RuleTreeId = RuleTreeId;
+                    if (ServiceCache.RuleTreeOriginCache.ContainsKey(sTargetRuleTreeId))
+                        RuleTree = new SvcRuleTree(ServiceCache.RuleTreeOriginCache[sTargetRuleTreeId]);
+                    else
+                        RuleTree.RuleTreeId = RuleTreeId;
 
                     // In the case that the caller wants to export the info about the RuleTree 
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];
                     if (RulesEngine != null)
                         RuleTree.RulesEngine = RulesEngine;
 
-                    RuleTree.RuleTreeOriginUrl =
-                        ServiceCache.RuleTreeOriginCache.ContainsKey(RuleTreeId) ? ServiceCache.RuleTreeOriginCache[RuleTreeId].RuleTreeOriginUrl : "";
-
                     // NOTE: This section may not be the best solution
                     // ServiceCache.GroveRegistryCache.SetGroveData(RuleTree);
                 }
-
 
                 // In the case that the caller wants to export the RuleTree (in XML form) from the chain
                 if (ExportMode)
