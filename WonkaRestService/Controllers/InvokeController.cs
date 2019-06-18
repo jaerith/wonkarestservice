@@ -40,6 +40,7 @@ namespace WonkaRestService.Controllers
         #region CONSTANTS
 
         public const string CONST_RECORD_KEY_RULE_TREE_ID = "RuleTreeId";
+        public const string CONST_RECORD_KEY_SEND_TRX_GAS = "InvokeRuleTreeGasThreshold";
         public const string CONST_RECORD_KEY_CQS_FLAG     = "CQS";
 
         #endregion
@@ -148,10 +149,14 @@ namespace WonkaRestService.Controllers
                 if (poRecord != null)
                 {
                     string sRuleTreeId = null;
-                    bool   bCQSFlag    = false;
+                    uint   nSendTrxGas = 0;
+                    bool   bCQSFlag    = false;                    
 
                     if (poRecord.ContainsKey(CONST_RECORD_KEY_RULE_TREE_ID))
                         sRuleTreeId = poRecord[CONST_RECORD_KEY_RULE_TREE_ID];
+
+                    if (poRecord.ContainsKey(CONST_RECORD_KEY_SEND_TRX_GAS) && (!String.IsNullOrEmpty(poRecord[CONST_RECORD_KEY_SEND_TRX_GAS])))
+                        UInt32.TryParse(poRecord[CONST_RECORD_KEY_SEND_TRX_GAS], out nSendTrxGas);
 
                     if (poRecord.ContainsKey(CONST_RECORD_KEY_CQS_FLAG))
                         bCQSFlag = (poRecord[CONST_RECORD_KEY_CQS_FLAG] == "Y");
@@ -182,7 +187,7 @@ namespace WonkaRestService.Controllers
 
                             WonkaRecord = poRecord.TransformToWonkaProduct();
 
-                            var SvcReport = ExecuteEthereum(WonkaRecord, RuleTreeOriginData, ServiceCache.RuleTreeCache[sRuleTreeId]);
+                            var SvcReport = ExecuteEthereum(WonkaRecord, RuleTreeOriginData, ServiceCache.RuleTreeCache[sRuleTreeId], nSendTrxGas);
                             SvcReport.RecordData = BasicRecord.RecordData;
 
                             // We only return the base class WonkaBreRuleTreeReport to the caller here
@@ -303,7 +308,7 @@ namespace WonkaRestService.Controllers
             return RuleTreeReport;
         }
 
-        private SvcRuleTreeReport ExecuteEthereum(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData, WonkaBreRulesEngine RulesEngine)
+        private SvcRuleTreeReport ExecuteEthereum(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData, WonkaBreRulesEngine RulesEngine, uint AssignedTrxGas = 0)
         {
             Nethereum.Contracts.Contract WonkaContract = null;
 
@@ -329,7 +334,7 @@ namespace WonkaRestService.Controllers
                 WonkaContract = GetWonkaContract();
             }
 
-            var BlockchainReport = RulesEngine.InvokeOnChain(WonkaContract, sInvokeSender);
+            var BlockchainReport = RulesEngine.InvokeOnChain(WonkaContract, sInvokeSender, AssignedTrxGas);
             if (BlockchainReport != null)
             {
                 RuleTreeReport = new SvcRuleTreeReport(false, BlockchainReport);
