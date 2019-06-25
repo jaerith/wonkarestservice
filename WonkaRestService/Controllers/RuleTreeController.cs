@@ -93,6 +93,8 @@ namespace WonkaRestService.Controllers
                 else if (!String.IsNullOrEmpty(ex.Message))
                     RuleTree.ErrorMessage = ex.Message;
 
+                RuleTree.StackTraceMessage = ex.StackTrace;
+
                 response = Request.CreateResponse<SvcRuleTree>(HttpStatusCode.BadRequest, RuleTree);
 
                 Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
