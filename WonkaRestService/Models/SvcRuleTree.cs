@@ -50,10 +50,11 @@ namespace WonkaRestService.Models
         {
             RuleTreeId        = poOriginal.RuleTreeId;
             RulesEngine       = null;
-            RuleTreeOriginUrl = poOriginal.RuleTreeOriginUrl;
+            RuleTreeOriginUrl = poOriginal.RuleTreeOriginUrl;            
             OwnerName         = poOriginal.OwnerName;
             ErrorMessage      = null;
 
+            SerializeToBlockchain = poOriginal.SerializeToBlockchain;
 
             msGroveId  = poOriginal.GroveId;
             mnGroveIdx = poOriginal.GroveIndex;
