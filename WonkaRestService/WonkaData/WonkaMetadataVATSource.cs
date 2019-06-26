@@ -28,6 +28,7 @@ namespace WonkaRestService.WonkaData
             AttrCache.Add(new WonkaRefAttr() { AttrId = 7, AttrName = "NewSellTaxAmount", FieldId = 107, GroupId = 1, IsAudited = true, IsNumeric = true });
             AttrCache.Add(new WonkaRefAttr() { AttrId = 8, AttrName = "NewVATAmountForHMRC", FieldId = 108, GroupId = 1, IsAudited = true, IsNumeric = true });
             AttrCache.Add(new WonkaRefAttr() { AttrId = 9, AttrName = "NewSaleEAN", FieldId = 109, GroupId = 1, IsAudited = false, IsNumeric = true, IsKey = false });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 10, AttrName = "StartSaleDate", FieldId = 110, GroupId = 1, IsAudited = false, IsDate = true, IsKey = false });
 
             return AttrCache;
         }
@@ -58,6 +59,7 @@ namespace WonkaRestService.WonkaData
             FieldCache.Add(new WonkaRefField() { FieldId = 107, FieldName = "NewSellTaxAmount", GroupId = 1, AttrIds = new List<int>() { 7 } });
             FieldCache.Add(new WonkaRefField() { FieldId = 108, FieldName = "NewVATAmountForHMRC", GroupId = 1, AttrIds = new List<int>() { 8 } });
             FieldCache.Add(new WonkaRefField() { FieldId = 109, FieldName = "NewSaleEAN", GroupId = 1, AttrIds = new List<int>() { 9 } });
+            FieldCache.Add(new WonkaRefField() { FieldId = 110, FieldName = "StartSaleDate", GroupId = 1, AttrIds = new List<int>() { 10 } });
 
             return FieldCache;
         }
