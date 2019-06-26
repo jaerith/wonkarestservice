@@ -361,6 +361,9 @@ namespace WonkaRestService.Controllers
             var RegistryItem =
                 NewSaleGrove.OrderedRuleTrees.Where(x => x.RuleTreeId == poEngine.DetermineRuleTreeChainID()).FirstOrDefault();
 
+            if (RegistryItem == null)
+                throw new Exception("ERROR!  No registry item found for GroveId(" + poEngine.GroveId + ") matching RuleTree(" + poEngine.DetermineRuleTreeChainID() + ").");
+
             if (String.IsNullOrEmpty(RegistryItem.RuleTreeId))
                 throw new Exception("ERROR!  No tree found from registry for GroveId(" + poEngine.GroveId + ") matching RuleTree(" + poEngine.DetermineRuleTreeChainID() + ").");
 
