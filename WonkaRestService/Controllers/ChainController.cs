@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Web.Http;
 
+using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Web3.Accounts;
 
 using WonkaEth.Extensions;
@@ -24,14 +25,15 @@ namespace WonkaRestService.Controllers
     {
         #region CONSTANTS
 
-        public const string CONST_CHAIN_DATA_KEY_ATTRNUM  = "attrnum";
-        public const string CONST_CHAIN_DATA_KEY_ATTRVAL  = "attrval";
-        public const string CONST_CHAIN_DATA_KEY_ALLREGTR = "getallregtrees"; 
-        public const string CONST_CHAIN_DATA_KEY_GETGRV   = "getgrove";
-        public const string CONST_CHAIN_DATA_KEY_GETGRVDC = "getgrovedesc";
-        public const string CONST_CHAIN_DATA_KEY_HASTREE  = "hastree";
-        public const string CONST_CHAIN_DATA_KEY_ISREGTR  = "istreereg";
-        public const string CONST_CHAIN_DATA_KEY_RETVAL   = "retval";
+        public const string CONST_CHAIN_DATA_KEY_ATTRNUM   = "attrnum";
+        public const string CONST_CHAIN_DATA_KEY_ATTRVAL   = "attrval";
+        public const string CONST_CHAIN_DATA_KEY_ALLREGTR  = "getallregtrees";
+        public const string CONST_CHAIN_DATA_KEY_GETBLKNUM = "getblocknum";
+        public const string CONST_CHAIN_DATA_KEY_GETGRV    = "getgrove";
+        public const string CONST_CHAIN_DATA_KEY_GETGRVDC  = "getgrovedesc";
+        public const string CONST_CHAIN_DATA_KEY_HASTREE   = "hastree";
+        public const string CONST_CHAIN_DATA_KEY_ISREGTR   = "istreereg";
+        public const string CONST_CHAIN_DATA_KEY_RETVAL    = "retval";
 
         public const string CONST_CHAIN_DATA_KEY_ORCHFLG = "orchflag";
         public const string CONST_CHAIN_DATA_KEY_ISSRCMP = "mapflag";
@@ -93,7 +95,9 @@ namespace WonkaRestService.Controllers
                 else if (type == CONST_CHAIN_DATA_KEY_ALLREGTR)
                     ChainData.Data = RetrieveAllRegisteredTrees();
                 else if (type == CONST_CHAIN_DATA_KEY_GETGRVDC)
-                    ChainData.Data = RetrieveGroveDesc(id);                
+                    ChainData.Data = RetrieveGroveDesc(id);
+                else if (type == CONST_CHAIN_DATA_KEY_GETBLKNUM)
+                    ChainData.Data = RetrieveBlockNum(id);
 
                 response = Request.CreateResponse<SvcChainData>(HttpStatusCode.Created, ChainData);
             }
@@ -194,6 +198,42 @@ namespace WonkaRestService.Controllers
                 sAttrValue = "ATTRIBUTE NOT VALID";
 
             return sAttrValue;
+        }
+
+        public string RetrieveBlockNum(string psConvertedToDecimal)
+        {
+            string sCurrBlockNum = "";
+
+            sCurrBlockNum = GetWeb3().Eth.Blocks.GetBlockNumber.SendRequestAsync().Result.HexValue.ToString();
+
+            if (!String.IsNullOrEmpty(sCurrBlockNum))
+            {                
+                if (sCurrBlockNum.HasHexPrefix())
+                {
+                    sCurrBlockNum = sCurrBlockNum.ToLower();
+
+                    if (sCurrBlockNum.StartsWith("0x"))
+                        sCurrBlockNum = sCurrBlockNum.Substring(2);
+                    else if (sCurrBlockNum.StartsWith("x"))
+                        sCurrBlockNum = sCurrBlockNum.Substring(1);
+                }
+
+                if (!String.IsNullOrEmpty(psConvertedToDecimal) && (psConvertedToDecimal == "TODOUBLE"))
+                {
+                    byte HexBytes = Convert.ToByte(sCurrBlockNum, 16);
+                    double dBlockNum = Convert.ToDouble(HexBytes);
+
+                    sCurrBlockNum = Convert.ToString(dBlockNum);
+                }
+                else if (!String.IsNullOrEmpty(psConvertedToDecimal) && (psConvertedToDecimal == "TOLONG"))
+                {
+                    long nBlockNum = Int64.Parse(sCurrBlockNum, System.Globalization.NumberStyles.HexNumber);
+
+                    sCurrBlockNum = Convert.ToString(nBlockNum);
+                }
+            }
+
+            return sCurrBlockNum;
         }
 
         private string RetrieveGroveData(string psGroveId)
