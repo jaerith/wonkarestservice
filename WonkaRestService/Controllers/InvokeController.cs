@@ -469,20 +469,6 @@ namespace WonkaRestService.Controllers
             WonkaServiceExtensions.SetAttribute(NewSaleProduct, NewVATAmountForHRMCAttr, "0");
         }
 
-        private Nethereum.Web3.Web3 GetWeb3()
-        {
-            Nethereum.Web3.Web3 web3 = null;
-
-            var account = new Account(msPassword);
-
-            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
-                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
-            else
-                web3 = new Nethereum.Web3.Web3(account);
-
-            return web3;
-        }
-
         public static string LookupVATDenominator(string psSaleItemType, string psCountryOfSale, string psDummyVal1, string psDummyVal2)
         {
             if (psSaleItemType == "Widget" && psCountryOfSale == "UK")

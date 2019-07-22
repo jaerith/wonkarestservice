@@ -121,6 +121,20 @@ namespace WonkaRestService.Controllers
             return contract;
         }
 
+        public Nethereum.Web3.Web3 GetWeb3()
+        {
+            var account = new Account(msPassword);
+
+            Nethereum.Web3.Web3 web3 = null;
+
+            if (!String.IsNullOrEmpty(moOrchInitData.Web3HttpUrl))
+                web3 = new Nethereum.Web3.Web3(account, moOrchInitData.Web3HttpUrl);
+            else
+                web3 = new Nethereum.Web3.Web3(account);
+
+            return web3;
+        }
+
         protected Nethereum.Contracts.Contract GetWonkaContract()
         {
             var account = new Account(msPassword);
