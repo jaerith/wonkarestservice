@@ -131,6 +131,28 @@ namespace WonkaRestService.Models
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public uint? ExecutionGasCost { get; set; }
 
+        [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public long InvocationBlockNum
+        {
+            get
+            {
+                long nBlockNum = 0;
+
+                if ((moChainReport != null) && (moChainReport.InvokeTrxBlockNumber != null))
+                {
+                    string sBlockNumHex = moChainReport.InvokeTrxBlockNumber.HexValue.ToString();
+
+                    byte HexBytes = Convert.ToByte(sBlockNumHex, 16);
+
+                    nBlockNum = Convert.ToInt64(HexBytes);
+                }
+                else
+                    nBlockNum = -1;
+
+                return nBlockNum;
+            }
+        }
+
         #endregion
 
         #region Members
