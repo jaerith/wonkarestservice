@@ -182,6 +182,9 @@ namespace WonkaRestService.Controllers
                         }
                         else
                         {
+                            if ((RuleTreeOriginData.MinGasCost > 0) && (nSendTrxGas > 0) && (RuleTreeOriginData.MinGasCost > nSendTrxGas))
+                                throw new Exception("ERROR!  Supplied gas amount (" + nSendTrxGas + ") is less than the minimum gas needed (" + RuleTreeOriginData.MinGasCost + ").");
+
                             WonkaRecord = poRecord.TransformToWonkaProduct(false);
                             WonkaRecord.SerializeProductData(ServiceCache.RuleTreeCache[sRuleTreeId], moOrchInitData.Web3HttpUrl);
 
