@@ -426,11 +426,6 @@
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
     <Content Include="WonkaData\VATCalculatePrecheck.xml" />
-    <Content Include="WonkaLibs\WonkaBre.dll" />
-    <Content Include="WonkaLibs\WonkaEth.dll" />
-    <Content Include="WonkaLibs\WonkaIpfs.dll" />
-    <Content Include="WonkaLibs\WonkaPrd.dll" />
-    <Content Include="WonkaLibs\WonkaRef.dll" />
     <Content Include="OpenAPI\invoke.openapi.json" />
     <Content Include="OpenAPI\trxstate.openapi.json" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
