@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-using WonkaBre.RuleTree;
-using WonkaEth.Contracts;
-using WonkaRef;
+using Wonka.BizRulesEngine.RuleTree;
+using Wonka.Eth.Contracts;
+using Wonka.MetaData;
 
 namespace WonkaRestService.CQS.Contracts
 {

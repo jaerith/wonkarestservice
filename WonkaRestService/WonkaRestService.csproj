@@ -64,44 +64,50 @@
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Nethereum.ABI, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.ABI.3.0.0\lib\net451\Nethereum.ABI.dll</HintPath>
+    <Reference Include="Nethereum.ABI, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.ABI.3.7.1\lib\net451\Nethereum.ABI.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.Accounts, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.Accounts.3.0.0\lib\net451\Nethereum.Accounts.dll</HintPath>
+    <Reference Include="Nethereum.Accounts, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.Accounts.3.7.1\lib\net451\Nethereum.Accounts.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.Contracts, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.Contracts.3.0.0\lib\net451\Nethereum.Contracts.dll</HintPath>
+    <Reference Include="Nethereum.BlockchainProcessing, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.BlockchainProcessing.3.7.1\lib\net451\Nethereum.BlockchainProcessing.dll</HintPath>
+    </Reference>
+    <Reference Include="Nethereum.Contracts, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.Contracts.3.7.1\lib\net451\Nethereum.Contracts.dll</HintPath>
     </Reference>
     <Reference Include="Nethereum.Geth, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
       <HintPath>..\packages\Nethereum.Geth.3.0.0\lib\net451\Nethereum.Geth.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.Hex, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.Hex.3.0.0\lib\net451\Nethereum.Hex.dll</HintPath>
+    <Reference Include="Nethereum.Hex, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.Hex.3.7.1\lib\net451\Nethereum.Hex.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.JsonRpc.Client, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.JsonRpc.Client.3.0.0\lib\net451\Nethereum.JsonRpc.Client.dll</HintPath>
+    <Reference Include="Nethereum.JsonRpc.Client, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.JsonRpc.Client.3.7.1\lib\net451\Nethereum.JsonRpc.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.JsonRpc.RpcClient, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.JsonRpc.RpcClient.3.0.0\lib\net451\Nethereum.JsonRpc.RpcClient.dll</HintPath>
+    <Reference Include="Nethereum.JsonRpc.RpcClient, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.JsonRpc.RpcClient.3.7.1\lib\net451\Nethereum.JsonRpc.RpcClient.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.KeyStore, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.KeyStore.3.0.0\lib\net451\Nethereum.KeyStore.dll</HintPath>
+    <Reference Include="Nethereum.KeyStore, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.KeyStore.3.7.1\lib\net451\Nethereum.KeyStore.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.RLP, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.RLP.3.0.0\lib\net451\Nethereum.RLP.dll</HintPath>
+    <Reference Include="Nethereum.Model, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.Model.3.7.1\lib\net451\Nethereum.Model.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.RPC, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.RPC.3.0.0\lib\net451\Nethereum.RPC.dll</HintPath>
+    <Reference Include="Nethereum.RLP, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.RLP.3.7.1\lib\net451\Nethereum.RLP.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.Signer, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.Signer.3.0.0\lib\net451\Nethereum.Signer.dll</HintPath>
+    <Reference Include="Nethereum.RPC, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.RPC.3.7.1\lib\net451\Nethereum.RPC.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.Util, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.Util.3.0.0\lib\net451\Nethereum.Util.dll</HintPath>
+    <Reference Include="Nethereum.Signer, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.Signer.3.7.1\lib\net451\Nethereum.Signer.dll</HintPath>
     </Reference>
-    <Reference Include="Nethereum.Web3, Version=3.0.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nethereum.Web3.3.0.0\lib\net451\Nethereum.Web3.dll</HintPath>
+    <Reference Include="Nethereum.Util, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.Util.3.7.1\lib\net451\Nethereum.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="Nethereum.Web3, Version=3.7.0.0, Culture=neutral, PublicKeyToken=8768a594786aba4e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nethereum.Web3.3.7.1\lib\net451\Nethereum.Web3.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -180,25 +186,23 @@
       <Private>True</Private>
       <HintPath>..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="WonkaBre, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>WonkaLibs\WonkaBre.dll</HintPath>
+    <Reference Include="Wonka.BizRulesEngine">
+      <HintPath>WonkaLibs\Wonka.BizRulesEngine.dll</HintPath>
     </Reference>
-    <Reference Include="WonkaEth, Version=1.0.6990.26738, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>WonkaLibs\WonkaEth.dll</HintPath>
+    <Reference Include="Wonka.Eth">
+      <HintPath>WonkaLibs\Wonka.Eth.dll</HintPath>
     </Reference>
-    <Reference Include="WonkaIpfs, Version=1.0.6990.26737, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>WonkaLibs\WonkaIpfs.dll</HintPath>
+    <Reference Include="Wonka.IpfsW">
+      <HintPath>WonkaLibs\Wonka.IpfsW.dll</HintPath>
     </Reference>
-    <Reference Include="WonkaPrd, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>WonkaLibs\WonkaPrd.dll</HintPath>
+    <Reference Include="Wonka.MetaData">
+      <HintPath>WonkaLibs\Wonka.MetaData.dll</HintPath>
     </Reference>
-    <Reference Include="WonkaRef, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>WonkaLibs\WonkaRef.dll</HintPath>
+    <Reference Include="Wonka.Product">
+      <HintPath>WonkaLibs\Wonka.Product.dll</HintPath>
+    </Reference>
+    <Reference Include="Wonka.Storage">
+      <HintPath>WonkaLibs\Wonka.Storage.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -479,7 +483,9 @@
     <EmbeddedResource Include="WonkaData\OrchTest.abi" />
     <EmbeddedResource Include="WonkaData\OrchTest.bin" />
     <EmbeddedResource Include="WonkaData\VATCalculationExample.xml" />
-    <EmbeddedResource Include="WonkaData\VATCalculationExample.init.xml" />
+    <EmbeddedResource Include="WonkaData\VATCalculationExample.init.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="WonkaData\WonkaRegistry.abi" />
     <EmbeddedResource Include="WonkaData\WonkaRegistry.bin" />
     <EmbeddedResource Include="WonkaData\WonkaRegistry.init.xml" />

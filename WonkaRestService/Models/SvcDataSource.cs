@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 
-using WonkaBre.RuleTree;
+using Wonka.BizRulesEngine.RuleTree;
 
 namespace WonkaRestService.Models
 {
@@ -16,7 +16,7 @@ namespace WonkaRestService.Models
             DataSource = null;
         }
 
-        public SvcDataSource(string psAttrName, WonkaBreSource poSource)
+        public SvcDataSource(string psAttrName, WonkaBizSource poSource)
         {
             AttributeName = psAttrName;
             DataSource    = poSource;
@@ -32,8 +32,8 @@ namespace WonkaRestService.Models
         {
             get
             {
-                if ((DataSource != null) && !String.IsNullOrEmpty(DataSource.APIServerAddress))
-                    return DataSource.APIServerAddress;
+                if ((DataSource != null) && !String.IsNullOrEmpty(DataSource.APIWebUrl))
+                    return DataSource.APIWebUrl;
                 else
                     return null;
             }
@@ -44,10 +44,7 @@ namespace WonkaRestService.Models
         {
             get
             {
-                if ((DataSource != null) && (DataSource.APIServerPort > 0))
-                    return DataSource.APIServerPort;
-                else
-                    return null;
+                return 8000;
             }
         }
 
@@ -78,7 +75,7 @@ namespace WonkaRestService.Models
             }
         }
 
-        private WonkaBreSource DataSource;
+        private WonkaBizSource DataSource;
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string BlockchainGetValueMethod
@@ -126,7 +123,7 @@ namespace WonkaRestService.Models
             {
                 if (DataSource != null)
                 {
-                    if (DataSource.TypeOfSource == WonkaBre.SOURCE_TYPE.SRC_TYPE_CONTRACT)
+                    if (DataSource.TypeOfSource == Wonka.BizRulesEngine.SOURCE_TYPE.SRC_TYPE_CONTRACT)
                         return "Contract";
                     else
                         return "API";

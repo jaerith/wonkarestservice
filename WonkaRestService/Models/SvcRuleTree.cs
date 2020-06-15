@@ -5,9 +5,9 @@ using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 
-using WonkaBre;
-using WonkaBre.Permissions;
-using WonkaBre.RuleTree;
+using Wonka.BizRulesEngine;
+using Wonka.BizRulesEngine.Permissions;
+using Wonka.BizRulesEngine.RuleTree;
 
 namespace WonkaRestService.Models
 {
@@ -67,7 +67,7 @@ namespace WonkaRestService.Models
 
         #region Properties
 
-        public WonkaBreRulesEngine RulesEngine { get; set; }
+        public WonkaBizRulesEngine RulesEngine { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<SvcDataSource> AttributeSources
@@ -184,14 +184,14 @@ namespace WonkaRestService.Models
         public bool SerializeToBlockchain { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public WonkaBreTransactionState TrxState
+        public WonkaBizTransactionState TrxState
         {
             get
             {
                 if ((RulesEngine != null) && (RulesEngine.TransactionState != null))
                 {
-                    if (RulesEngine.TransactionState is WonkaBreTransactionState)
-                        return (WonkaBreTransactionState) RulesEngine.TransactionState;
+                    if (RulesEngine.TransactionState is WonkaBizTransactionState)
+                        return (WonkaBizTransactionState) RulesEngine.TransactionState;
                     else
                         return null;
                 }

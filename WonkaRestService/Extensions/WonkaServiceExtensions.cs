@@ -8,10 +8,10 @@ using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.ABI.Model;
 using Nethereum.Contracts;
 
-using WonkaBre;
-using WonkaEth.Extensions;
-using WonkaRef;
-using WonkaPrd;
+using Wonka.BizRulesEngine;
+using Wonka.Eth.Extensions;
+using Wonka.MetaData;
+using Wonka.Product;
 
 using WonkaRestService.Cache;
 using WonkaRestService.Models;
@@ -75,9 +75,9 @@ namespace WonkaRestService.Extensions
                     // poRuleTree.RulesEngine.AllRuleSets.ForEach(x => nMaxGasCost += (uint)(x.AssertiveRules.Count * CONST_GAS_PER_WRITE_OP));
 
 
-                    foreach (WonkaBre.RuleTree.WonkaBreRuleSet TempRuleSet in poRuleTree.RulesEngine.AllRuleSets)
+                    foreach (Wonka.BizRulesEngine.RuleTree.WonkaBizRuleSet TempRuleSet in poRuleTree.RulesEngine.AllRuleSets)
                     {
-                        foreach (WonkaBre.RuleTree.WonkaBreRule TempRule in TempRuleSet.AssertiveRules)
+                        foreach (Wonka.BizRulesEngine.RuleTree.WonkaBizRule TempRule in TempRuleSet.AssertiveRules)
                         {
                             if (TempRule.RuleType == RULE_TYPE.RT_CUSTOM_OP)
                                 nMaxGasCost += (uint)(3 * CONST_GAS_PER_WRITE_OP);
@@ -93,7 +93,7 @@ namespace WonkaRestService.Extensions
             poRuleTree.MaxGasCost = nMaxGasCost;
         }
 
-        public static void DeserializeProductData(this WonkaProduct poTargetProduct, WonkaBreRulesEngine poRulesEngine, string psWeb3HttpUrl = "")
+        public static void DeserializeProductData(this WonkaProduct poTargetProduct, WonkaBizRulesEngine poRulesEngine, string psWeb3HttpUrl = "")
         {
             try
             { WonkaRefEnvironment.GetInstance(); }
@@ -104,7 +104,7 @@ namespace WonkaRestService.Extensions
                 poRulesEngine.SourceMap[sTargetAttrName].DeserializeProductData(poTargetProduct, sTargetAttrName, psWeb3HttpUrl);
         }
 
-        public static void DeserializeProductData(this WonkaBre.RuleTree.WonkaBreSource poSource, WonkaProduct poTargetProduct, string sAttrName, string psWeb3HttpUrl = "")
+        public static void DeserializeProductData(this Wonka.BizRulesEngine.RuleTree.WonkaBizSource poSource, WonkaProduct poTargetProduct, string sAttrName, string psWeb3HttpUrl = "")
         {
             var Contract = poSource.GetContract(psWeb3HttpUrl);
 
@@ -119,6 +119,7 @@ namespace WonkaRestService.Extensions
             WonkaServiceExtensions.SetAttribute(poTargetProduct, TargetAttr, sAttrValue);
         }
 
+        /*
         public static string GetAttributeValue(this WonkaProduct poTargetProduct, WonkaRefAttr poTargetAttr)
         {
             string sAttrValue = "";
@@ -137,8 +138,9 @@ namespace WonkaRestService.Extensions
 
             return sAttrValue;
         }
+        */
 
-        public static Contract GetContract(this WonkaBre.RuleTree.WonkaBreSource poSource, string psWeb3HttpUrl = "")
+        public static Contract GetContract(this Wonka.BizRulesEngine.RuleTree.WonkaBizSource poSource, string psWeb3HttpUrl = "")
         {
             var account = new Nethereum.Web3.Accounts.Account(poSource.Password);
             
@@ -186,7 +188,7 @@ namespace WonkaRestService.Extensions
             return ruleTreeReport;
         }
 
-        public static void Serialize(this SvcGrove poGrove, WonkaEth.Init.WonkaEthSource poRegBlockchainData, string psWeb3HttpUrl = "")
+        public static void Serialize(this SvcGrove poGrove, Wonka.Eth.Init.WonkaEthSource poRegBlockchainData, string psWeb3HttpUrl = "")
         {
             if (poGrove.RuleTreeMembers != null)
             {
@@ -235,7 +237,7 @@ namespace WonkaRestService.Extensions
             }
         }
 
-        public static void SerializeProductData(this WonkaProduct poTargetProduct, WonkaBreRulesEngine poRulesEngine, string psWeb3HttpUrl = "")
+        public static void SerializeProductData(this WonkaProduct poTargetProduct, WonkaBizRulesEngine poRulesEngine, string psWeb3HttpUrl = "")
         {
             try
             { WonkaRefEnvironment.GetInstance(); }
@@ -263,7 +265,7 @@ namespace WonkaRestService.Extensions
             }
         }
 
-        public static void SerializeProductData(this WonkaBre.RuleTree.WonkaBreSource poSource, string psAttrName, string psAttrValue, string psWeb3HttpUrl = "")
+        public static void SerializeProductData(this Wonka.BizRulesEngine.RuleTree.WonkaBizSource poSource, string psAttrName, string psAttrValue, string psWeb3HttpUrl = "")
         {
             var contract = poSource.GetContract(psWeb3HttpUrl);
 
@@ -277,7 +279,7 @@ namespace WonkaRestService.Extensions
                 setAttrFunction.SendTransactionAsync(poSource.SenderAddress, gas, null, psAttrName, psAttrValue).Result;
         }
 
-        public static void SerializeToGrove(this WonkaBreRulesEngine poTargetRuleTree, Contract poRegistryContract, string psSender, string psGroveId, string psWeb3HttpUrl = "")
+        public static void SerializeToGrove(this WonkaBizRulesEngine poTargetRuleTree, Contract poRegistryContract, string psSender, string psGroveId, string psWeb3HttpUrl = "")
         {
             var addTreeToGroveFunction = poRegistryContract.GetFunction(CONST_CONTRACT_FUNCTION_ADD_TR_TO_GR);
 

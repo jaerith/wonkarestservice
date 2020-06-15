@@ -9,11 +9,11 @@ using System.Web.Http;
 
 using Nethereum.Web3.Accounts;
 
-using WonkaBre;
-using WonkaEth.Extensions;
-using WonkaBre.RuleTree;
-using WonkaPrd;
-using WonkaRef;
+using Wonka.BizRulesEngine;
+using Wonka.Eth.Extensions;
+using Wonka.BizRulesEngine.RuleTree;
+using Wonka.Product;
+using Wonka.MetaData;
 
 using WonkaRestService.Cache;
 using WonkaRestService.Extensions;
@@ -49,7 +49,7 @@ namespace WonkaRestService.Controllers
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                WonkaBreRulesEngine RulesEngine = null;
+                WonkaBizRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {
                     if (ServiceCache.RuleTreeOriginCache.ContainsKey(sTargetRuleTreeId))
@@ -150,8 +150,13 @@ namespace WonkaRestService.Controllers
                     if (bAnotherTreeWithOwner)
                         throw new Exception("ERROR!  Owner Name(" + RuleTreeData.OwnerName + ") already owns a tree and can only have one tree.");
                 }
+                // NOTE: This code can be retired once this endpoint no longer uses a default value and requires a provided owner in the payload
+                else if (ServiceCache.RuleTreeOriginCache.Values.Any(x => String.IsNullOrEmpty(x.OwnerName)))
+                {
+                    throw new Exception("ERROR!  Owner Name (default) already owns a tree and can only have one tree.");
+                }
 
-                WonkaBreRulesEngine NewRulesEngine = null;
+                WonkaBizRulesEngine NewRulesEngine = null;
 
                 using (WebClient client = new WebClient())
                 {
@@ -170,7 +175,7 @@ namespace WonkaRestService.Controllers
                         bAddToRegistry = true;
 
                     NewRulesEngine =
-                        new WonkaBreRulesEngine(new StringBuilder(sRuleTreeContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, bAddToRegistry);
+                        new WonkaBizRulesEngine(new StringBuilder(sRuleTreeContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, bAddToRegistry);
 
                     NewRulesEngine.GroveId    = RuleTreeData.GroveId;
                     NewRulesEngine.GroveIndex = RuleTreeData.GroveIndex;
@@ -348,11 +353,11 @@ namespace WonkaRestService.Controllers
 
         #region Methods
 
-        protected string ExportRuleTreeXml(WonkaBreRulesEngine poEngine)
+        protected string ExportRuleTreeXml(WonkaBizRulesEngine poEngine)
         {
             string sRuleTreeXml = "";
 
-            WonkaEth.Contracts.WonkaRuleGrove NewSaleGrove = new WonkaEth.Contracts.WonkaRuleGrove(poEngine.GroveId);
+            Wonka.Eth.Contracts.WonkaRuleGrove NewSaleGrove = new Wonka.Eth.Contracts.WonkaRuleGrove(poEngine.GroveId);
             NewSaleGrove.PopulateFromRegistry(msAbiWonka);
 
             if (NewSaleGrove.OrderedRuleTrees.Count <= 0)

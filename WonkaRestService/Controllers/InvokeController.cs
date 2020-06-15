@@ -11,11 +11,12 @@ using System.Web.Http;
 
 using Nethereum.Web3.Accounts;
 
-using WonkaBre;
-using WonkaEth.Extensions;
-using WonkaBre.RuleTree;
-using WonkaPrd;
-using WonkaRef;
+using Wonka.BizRulesEngine;
+using Wonka.BizRulesEngine.Reporting;
+using Wonka.BizRulesEngine.RuleTree;
+using Wonka.Eth.Extensions;
+using Wonka.Product;
+using Wonka.MetaData;
 
 using WonkaRestService.Cache;
 using WonkaRestService.Extensions;
@@ -92,7 +93,8 @@ namespace WonkaRestService.Controllers
 
                     WonkaProduct WonkaRecord = poRecord.TransformToWonkaProduct();
 
-                    WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = ExecuteDotNet(WonkaRecord, sRuleTreeId);
+                    Wonka.BizRulesEngine.Reporting.WonkaBizRuleTreeReport RuleTreeReport = 
+                        ExecuteDotNet(WonkaRecord, sRuleTreeId);
 
                     if (RuleTreeReport.OverallRuleTreeResult != ERR_CD.CD_SUCCESS)
                         BasicRecord.RuleTreeReport = RuleTreeReport;
@@ -170,7 +172,7 @@ namespace WonkaRestService.Controllers
 
                     WonkaProduct WonkaRecord = new WonkaProduct();
 
-                    WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = null;
+                    Wonka.BizRulesEngine.Reporting.WonkaBizRuleTreeReport RuleTreeReport = null;
 
                     if (mbInteractWithChain)
                     {
@@ -193,7 +195,7 @@ namespace WonkaRestService.Controllers
                             var SvcReport = ExecuteEthereum(WonkaRecord, RuleTreeOriginData, ServiceCache.RuleTreeCache[sRuleTreeId], nSendTrxGas);
                             SvcReport.RecordData = BasicRecord.RecordData;
 
-                            // We only return the base class WonkaBreRuleTreeReport to the caller here
+                            // We only return the base class WonkaBizRuleTreeReport to the caller here
                             RuleTreeReport = SvcReport;
 
                             // NOTE: We only cache the reports when we invoke a RuleTree on the chain
@@ -261,7 +263,7 @@ namespace WonkaRestService.Controllers
             return sOrchestrationContractAddress;
         }
 
-        private WonkaBre.Reporting.WonkaBreRuleTreeReport ExecuteDotNet(WonkaProduct NewRecord, string psRuleTreeId = CONST_RULES_RESOURCE_ID)
+        private Wonka.BizRulesEngine.Reporting.WonkaBizRuleTreeReport ExecuteDotNet(WonkaProduct NewRecord, string psRuleTreeId = CONST_RULES_RESOURCE_ID)
         {
             // Using the metadata source, we create an instance of a defined data domain
             WonkaRefEnvironment RefEnv =
@@ -278,13 +280,13 @@ namespace WonkaRestService.Controllers
             WonkaRefAttr NewSellTaxAmountAttr = RefEnv.GetAttributeByAttrName("NewSellTaxAmount");
             WonkaRefAttr VATAmountForHMRCAttr = RefEnv.GetAttributeByAttrName("NewVATAmountForHMRC");
 
-            WonkaBreRulesEngine RulesEngine = null;
+            WonkaBizRulesEngine RulesEngine = null;
             if (!String.IsNullOrEmpty(psRuleTreeId) && ServiceCache.RuleTreeCache.ContainsKey(psRuleTreeId))
                 RulesEngine = ServiceCache.RuleTreeCache[psRuleTreeId];
             else
             {
                 RulesEngine =
-                    new WonkaBreRulesEngine(new StringBuilder(msVATCalcRulesContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
+                    new WonkaBizRulesEngine(new StringBuilder(msVATCalcRulesContents), moAttrSourceMap, moCustomOpMap, moMetadataSource, false);
 
                 ServiceCache.RuleTreeCache[psRuleTreeId] = RulesEngine;
             }
@@ -299,7 +301,8 @@ namespace WonkaRestService.Controllers
             // RulesEngine.GetCurrentProductDelegate = GetOldProduct;
 
             // Validate the new record using our rules engine and its initialized RuleTree
-            WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport = RulesEngine.Validate(NewRecord);
+            Wonka.BizRulesEngine.Reporting.WonkaBizRuleTreeReport RuleTreeReport 
+                = RulesEngine.Validate(NewRecord);
 
             // Check that the data has been populated correctly on the "new" record
             string sNewSellTaxAmtAfter    = NewRecord.GetAttributeValue(NewSellTaxAmountAttr);
@@ -311,7 +314,7 @@ namespace WonkaRestService.Controllers
             return RuleTreeReport;
         }
 
-        private SvcRuleTreeReport ExecuteEthereum(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData, WonkaBreRulesEngine RulesEngine, uint AssignedTrxGas = 0)
+        private SvcRuleTreeReport ExecuteEthereum(WonkaProduct NewRecord, SvcRuleTree RuleTreeOriginData, WonkaBizRulesEngine RulesEngine, uint AssignedTrxGas = 0)
         {
             Nethereum.Contracts.Contract WonkaContract = null;
 
@@ -396,8 +399,8 @@ namespace WonkaRestService.Controllers
             string sNewSellTaxAmt    = Convert.ToString(SalesTrxCommand.NewSellTaxAmt);
             string sNewVATAmtForHMRC = Convert.ToString(SalesTrxCommand.NewVATAmtForHMRC);
 
-            WonkaPrd.WonkaPrdExtensions.SetAttribute(NewRecord, NewSellTaxAmtAttr, sNewSellTaxAmt);
-            WonkaPrd.WonkaPrdExtensions.SetAttribute(NewRecord, NewVATAmtForHMRCAttr, sNewVATAmtForHMRC);
+            Wonka.Product.WonkaPrdExtensions.SetAttribute(NewRecord, NewSellTaxAmtAttr, sNewSellTaxAmt);
+            Wonka.Product.WonkaPrdExtensions.SetAttribute(NewRecord, NewVATAmtForHMRCAttr, sNewVATAmtForHMRC);
 
             #endregion
 
@@ -408,12 +411,12 @@ namespace WonkaRestService.Controllers
             // its Grove "NewSaleGroup" - since it is the sole member of the Grove, it will still be the only RuleTree
             // applied to the record - in this scenario, we pretend that we know nothing about the RuleTree or the Grove, 
             // effectively treating it as a black box and only looking to retrieve the VAT
-            WonkaEth.Contracts.WonkaRuleGrove NewSaleGrove = new WonkaEth.Contracts.WonkaRuleGrove("NewSaleGroup");
+            Wonka.Eth.Contracts.WonkaRuleGrove NewSaleGrove = new Wonka.Eth.Contracts.WonkaRuleGrove("NewSaleGroup");
             NewSaleGrove.PopulateFromRegistry(msAbiWonka);
 
             // The engine's lightweight proxy for the blockchain is instantiated here
-            WonkaEth.Orchestration.WonkaOrchestratorProxy<CQS.Contracts.SalesTrxCreateCommand> TrxGeneratorProxy = 
-                new WonkaEth.Orchestration.WonkaOrchestratorProxy<CQS.Contracts.SalesTrxCreateCommand>(SalesTrxCommand, moOrchInitData);
+            Wonka.Eth.Orchestration.WonkaOrchestratorProxy<CQS.Contracts.SalesTrxCreateCommand> TrxGeneratorProxy = 
+                new Wonka.Eth.Orchestration.WonkaOrchestratorProxy<CQS.Contracts.SalesTrxCreateCommand>(SalesTrxCommand, moOrchInitData);
 
             // We reset the values here and in the blockchain (by serializing)
             SalesTrxCommand.NewSellTaxAmt    = 0;
@@ -424,7 +427,7 @@ namespace WonkaRestService.Controllers
             // NOTE: Only useful when debugging
             // TrxGeneratorProxy.DeserializeRecordFromBlockchain(SalesTrxCommand);
 
-            Dictionary<string, WonkaEth.Contracts.IOrchestrate> GroveMembers = new Dictionary<string, WonkaEth.Contracts.IOrchestrate>();
+            Dictionary<string, Wonka.Eth.Contracts.IOrchestrate> GroveMembers = new Dictionary<string, Wonka.Eth.Contracts.IOrchestrate>();
             GroveMembers[NewSaleGrove.OrderedRuleTrees[0].RuleTreeId] = TrxGeneratorProxy;
 
             // With their provided proxies for each RuleTree, we can now execute the Grove (or, in this case, our sole RuleTree)

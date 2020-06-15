@@ -5,8 +5,9 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
-using WonkaBre;
-using WonkaEth.Extensions;
+using Wonka.BizRulesEngine;
+using Wonka.BizRulesEngine.Permissions;
+using Wonka.Eth.Extensions;
 
 using WonkaRestService.Cache;
 using WonkaRestService.Models;
@@ -43,12 +44,12 @@ namespace WonkaRestService.Controllers
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                WonkaBreRulesEngine RulesEngine = null;
+                WonkaBizRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];
 
-                    if ((RulesEngine.TransactionState != null) && (RulesEngine.TransactionState is WonkaBre.Permissions.WonkaBreTransactionState))
+                    if ((RulesEngine.TransactionState != null) && (RulesEngine.TransactionState is WonkaBizTransactionState))
                     {
                         HashSet<string> OwnersTotal =
                             new HashSet<string>(RulesEngine.TransactionState.GetOwnersConfirmed());
@@ -58,7 +59,7 @@ namespace WonkaRestService.Controllers
                         if (OwnersTotal.Count > 0)
                         {
                             TrxState =
-                                new SvcTrxState(sTargetRuleTreeId, (WonkaBre.Permissions.WonkaBreTransactionState)RulesEngine.TransactionState, OwnersTotal);
+                                new SvcTrxState(sTargetRuleTreeId, (WonkaBizTransactionState)RulesEngine.TransactionState, OwnersTotal);
 
                             TrxState.RefreshSvcOwnerList();
                         }
@@ -138,7 +139,7 @@ namespace WonkaRestService.Controllers
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                WonkaBreRulesEngine RulesEngine = null;
+                WonkaBizRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];
@@ -209,7 +210,7 @@ namespace WonkaRestService.Controllers
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                WonkaBreRulesEngine RulesEngine = null;
+                WonkaBizRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];

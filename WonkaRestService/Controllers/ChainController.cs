@@ -11,9 +11,9 @@ using System.Web.Http;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Web3.Accounts;
 
-using WonkaEth.Extensions;
-using WonkaBre.RuleTree;
-using WonkaRef;
+using Wonka.Eth.Extensions;
+using Wonka.BizRulesEngine.RuleTree;
+using Wonka.MetaData;
 
 using WonkaRestService.Cache;
 using WonkaRestService.Extensions;
@@ -243,7 +243,7 @@ namespace WonkaRestService.Controllers
             /*
             if (!String.IsNullOrEmpty(psGroveId) && WonkaServiceCache.GetInstance().GroveRegistryCache.ContainsKey(psGroveId))
             {
-                WonkaEth.Contracts.WonkaRuleGrove RuleGrove = new WonkaEth.Contracts.WonkaRuleGrove(psGroveId);
+                Wonka.Eth.Contracts.WonkaRuleGrove RuleGrove = new Wonka.Eth.Contracts.WonkaRuleGrove(psGroveId);
                 
                 RuleGrove.PopulateFromRegistry(msAbiWonka);
 
@@ -257,7 +257,7 @@ namespace WonkaRestService.Controllers
                     GroveDataBuilder.Append("|");
 
                     bool bPrependComma = false;
-                    foreach (WonkaEth.Contracts.WonkaRegistryItem TmpRegTree in RuleGrove.OrderedRuleTrees)
+                    foreach (Wonka.Eth.Contracts.WonkaRegistryItem TmpRegTree in RuleGrove.OrderedRuleTrees)
                     {
                         if (bPrependComma)
                             GroveDataBuilder.Append(",");
@@ -381,7 +381,7 @@ namespace WonkaRestService.Controllers
             {
                 /*
                  * NOTE: Needs more work
-                WonkaEth.Contracts.WonkaRegistryItem RegistryItem = new WonkaEth.Contracts.WonkaRegistryItem();
+                Wonka.Eth.Contracts.WonkaRegistryItem RegistryItem = new Wonka.Eth.Contracts.WonkaRegistryItem();
 
                 sRuleTreeXml = RegistryItem.ExportXmlString(moOrchInitData.Web3HttpUrl);
                 */

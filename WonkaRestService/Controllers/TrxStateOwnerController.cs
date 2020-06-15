@@ -5,7 +5,8 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
-using WonkaBre;
+using Wonka.BizRulesEngine;
+using Wonka.BizRulesEngine.Permissions;
 
 using WonkaRestService.Cache;
 using WonkaRestService.Models;
@@ -41,12 +42,12 @@ namespace WonkaRestService.Controllers
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                WonkaBreRulesEngine RulesEngine = null;
+                WonkaBizRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];
 
-                    if ((RulesEngine.TransactionState != null) && (RulesEngine.TransactionState is WonkaBre.Permissions.WonkaBreTransactionState))
+                    if ((RulesEngine.TransactionState != null) && (RulesEngine.TransactionState is WonkaBizTransactionState))
                     {
                         if (RulesEngine.TransactionState.IsOwner(Owner))
                         {
@@ -121,7 +122,7 @@ namespace WonkaRestService.Controllers
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                WonkaBreRulesEngine RulesEngine = null;
+                WonkaBizRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];
@@ -189,12 +190,12 @@ namespace WonkaRestService.Controllers
 
                 WonkaServiceCache ServiceCache = WonkaServiceCache.GetInstance();
 
-                WonkaBreRulesEngine RulesEngine = null;
+                WonkaBizRulesEngine RulesEngine = null;
                 if (ServiceCache.RuleTreeCache.ContainsKey(sTargetRuleTreeId))
                 {
                     RulesEngine = ServiceCache.RuleTreeCache[sTargetRuleTreeId];
 
-                    if ((RulesEngine.TransactionState != null) && (RulesEngine.TransactionState is WonkaBre.Permissions.WonkaBreTransactionState))
+                    if ((RulesEngine.TransactionState != null) && (RulesEngine.TransactionState is WonkaBizTransactionState))
                     {
                         if (RulesEngine.TransactionState.IsOwner(Owner))
                             RulesEngine.TransactionState.RemoveOwner(Owner);

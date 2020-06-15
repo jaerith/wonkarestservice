@@ -8,13 +8,13 @@ using System.Web;
 
 using Newtonsoft.Json;
 
-using WonkaBre.Reporting;
+using Wonka.BizRulesEngine.Reporting;
 
 using WonkaRestService.Extensions;
 
 namespace WonkaRestService.Models
 {
-    public class SvcRuleTreeReport : WonkaBreRuleTreeReport
+    public class SvcRuleTreeReport : WonkaBizRuleTreeReport
     {
         public SvcRuleTreeReport(bool pbSimulationMode, bool pbSerializeAllInfo = false)
         {
@@ -29,7 +29,7 @@ namespace WonkaRestService.Models
             ExecutionGasCost = null;
         }
 
-        public SvcRuleTreeReport(bool pbSimulationMode, WonkaEth.Extensions.RuleTreeReport poChainReport, bool pbSerializeAllInfo = false)
+        public SvcRuleTreeReport(bool pbSimulationMode, Wonka.Eth.Extensions.RuleTreeReport poChainReport, bool pbSerializeAllInfo = false)
         {
             SimulationMode = pbSimulationMode;
 
@@ -159,7 +159,7 @@ namespace WonkaRestService.Models
 
         protected bool mbSerializeAllInfo;
 
-        protected WonkaEth.Extensions.RuleTreeReport moChainReport;
+        protected Wonka.Eth.Extensions.RuleTreeReport moChainReport;
 
         #endregion
 

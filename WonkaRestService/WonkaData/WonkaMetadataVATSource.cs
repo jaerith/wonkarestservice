@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using WonkaRef;
+using Wonka.MetaData;
 
 namespace WonkaRestService.WonkaData
 {
@@ -19,16 +19,16 @@ namespace WonkaRestService.WonkaData
         {
             List<WonkaRefAttr> AttrCache = new List<WonkaRefAttr>();
 
-            AttrCache.Add(new WonkaRefAttr() { AttrId = 1, AttrName = "NewSalesTransSeq", FieldId = 101, GroupId = 1, IsAudited = false, IsNumeric = true, IsKey = true });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 1, AttrName = "NewSalesTransSeq",    FieldId = 101, GroupId = 1, IsAudited = false, IsNumeric = true, IsKey = true });
             AttrCache.Add(new WonkaRefAttr() { AttrId = 2, AttrName = "NewSaleVATRateDenom", FieldId = 102, GroupId = 1, IsAudited = true, IsNumeric = true, });
-            AttrCache.Add(new WonkaRefAttr() { AttrId = 3, AttrName = "NewSaleItemType", FieldId = 103, GroupId = 1, IsAudited = false, MaxLength = 1024 });
-            AttrCache.Add(new WonkaRefAttr() { AttrId = 4, AttrName = "CountryOfSale", FieldId = 104, GroupId = 1, IsAudited = true, MaxLength = 3 });
-            AttrCache.Add(new WonkaRefAttr() { AttrId = 5, AttrName = "NewSalePrice", FieldId = 105, GroupId = 1, IsAudited = true, IsNumeric = true });
-            AttrCache.Add(new WonkaRefAttr() { AttrId = 6, AttrName = "PrevSellTaxAmount", FieldId = 106, GroupId = 1, IsAudited = true, IsNumeric = true });
-            AttrCache.Add(new WonkaRefAttr() { AttrId = 7, AttrName = "NewSellTaxAmount", FieldId = 107, GroupId = 1, IsAudited = true, IsNumeric = true });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 3, AttrName = "NewSaleItemType",     FieldId = 103, GroupId = 1, IsAudited = false, MaxLength = 1024 });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 4, AttrName = "CountryOfSale",       FieldId = 104, GroupId = 1, IsAudited = true, MaxLength = 3 });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 5, AttrName = "NewSalePrice",        FieldId = 105, GroupId = 1, IsAudited = true, IsNumeric = true });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 6, AttrName = "PrevSellTaxAmount",   FieldId = 106, GroupId = 1, IsAudited = true, IsNumeric = true });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 7, AttrName = "NewSellTaxAmount",    FieldId = 107, GroupId = 1, IsAudited = true, IsNumeric = true });
             AttrCache.Add(new WonkaRefAttr() { AttrId = 8, AttrName = "NewVATAmountForHMRC", FieldId = 108, GroupId = 1, IsAudited = true, IsNumeric = true });
-            AttrCache.Add(new WonkaRefAttr() { AttrId = 9, AttrName = "NewSaleEAN", FieldId = 109, GroupId = 1, IsAudited = false, IsNumeric = true, IsKey = false });
-            AttrCache.Add(new WonkaRefAttr() { AttrId = 10, AttrName = "StartSaleDate", FieldId = 110, GroupId = 1, IsAudited = false, IsDate = true, IsKey = false });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 9, AttrName = "NewSaleEAN",          FieldId = 109, GroupId = 1, IsAudited = false, IsNumeric = true, IsKey = false });
+            AttrCache.Add(new WonkaRefAttr() { AttrId = 10, AttrName = "StartSaleDate",      FieldId = 110, GroupId = 1, IsAudited = false, IsDate = true, IsKey = false });
 
             return AttrCache;
         }
@@ -46,20 +46,20 @@ namespace WonkaRestService.WonkaData
             return CurrencyCache;
         }
 
-        public List<WonkaRefField> GetFieldCache()
+        public List<WonkaRefCadre> GetCadreCache()
         {
-            List<WonkaRefField> FieldCache = new List<WonkaRefField>();
+            List<WonkaRefCadre> FieldCache = new List<WonkaRefCadre>();
 
-            FieldCache.Add(new WonkaRefField() { FieldId = 101, FieldName = "NewSalesTransSeq", GroupId = 1, AttrIds = new List<int>() { 1 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 102, FieldName = "NewSaleVATRateDenom", GroupId = 1, AttrIds = new List<int>() { 2 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 103, FieldName = "NewSaleItemType", GroupId = 1, AttrIds = new List<int>() { 3 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 104, FieldName = "CountryOfSale", GroupId = 1, AttrIds = new List<int>() { 4 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 105, FieldName = "NewSalePrice", GroupId = 1, AttrIds = new List<int>() { 5 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 106, FieldName = "PrevSellTaxAmount", GroupId = 1, AttrIds = new List<int>() { 6 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 107, FieldName = "NewSellTaxAmount", GroupId = 1, AttrIds = new List<int>() { 7 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 108, FieldName = "NewVATAmountForHMRC", GroupId = 1, AttrIds = new List<int>() { 8 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 109, FieldName = "NewSaleEAN", GroupId = 1, AttrIds = new List<int>() { 9 } });
-            FieldCache.Add(new WonkaRefField() { FieldId = 110, FieldName = "StartSaleDate", GroupId = 1, AttrIds = new List<int>() { 10 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 101, CadreName = "NewSalesTransSeq",    GroupId = 1, AttrIds = new List<int>() { 1 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 102, CadreName = "NewSaleVATRateDenom", GroupId = 1, AttrIds = new List<int>() { 2 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 103, CadreName = "NewSaleItemType",     GroupId = 1, AttrIds = new List<int>() { 3 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 104, CadreName = "CountryOfSale",       GroupId = 1, AttrIds = new List<int>() { 4 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 105, CadreName = "NewSalePrice",        GroupId = 1, AttrIds = new List<int>() { 5 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 106, CadreName = "PrevSellTaxAmount",   GroupId = 1, AttrIds = new List<int>() { 6 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 107, CadreName = "NewSellTaxAmount",    GroupId = 1, AttrIds = new List<int>() { 7 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 108, CadreName = "NewVATAmountForHMRC", GroupId = 1, AttrIds = new List<int>() { 8 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 109, CadreName = "NewSaleEAN",          GroupId = 1, AttrIds = new List<int>() { 9 } });
+            FieldCache.Add(new WonkaRefCadre() { CadreId = 110, CadreName = "StartSaleDate",       GroupId = 1, AttrIds = new List<int>() { 10 } });
 
             return FieldCache;
         }
@@ -83,16 +83,16 @@ namespace WonkaRestService.WonkaData
             return SourceCache;
         }
 
-        public List<WonkaRefSourceField> GetSourceFieldCache()
+        public List<WonkaRefSourceCadre> GetSourceCadreCache()
         {
-            List<WonkaRefSourceField> SourceFieldCache = new List<WonkaRefSourceField>();
+            List<WonkaRefSourceCadre> SourceCadreCache = new List<WonkaRefSourceCadre>();
 
-            SourceFieldCache.Add(new WonkaRefSourceField() { SourceFieldId = 1, SourceId = 1, FieldId = 102, SecurityLevel = 3 });
-            SourceFieldCache.Add(new WonkaRefSourceField() { SourceFieldId = 2, SourceId = 1, FieldId = 2, SecurityLevel = 1 });
-            SourceFieldCache.Add(new WonkaRefSourceField() { SourceFieldId = 3, SourceId = 2, FieldId = 102, SecurityLevel = 3 });
-            SourceFieldCache.Add(new WonkaRefSourceField() { SourceFieldId = 4, SourceId = 2, FieldId = 2, SecurityLevel = 1 });
+            SourceCadreCache.Add(new WonkaRefSourceCadre() { SourceCadreId = 1, SourceId = 1, CadreId = 102, SecurityLevel = 3 });
+            SourceCadreCache.Add(new WonkaRefSourceCadre() { SourceCadreId = 2, SourceId = 1, CadreId = 2,   SecurityLevel = 1 });
+            SourceCadreCache.Add(new WonkaRefSourceCadre() { SourceCadreId = 3, SourceId = 2, CadreId = 102, SecurityLevel = 3 });
+            SourceCadreCache.Add(new WonkaRefSourceCadre() { SourceCadreId = 4, SourceId = 2, CadreId = 2,   SecurityLevel = 1 });
 
-            return SourceFieldCache;
+            return SourceCadreCache;
         }
 
         public List<WonkaRefStandard> GetStandardCache()

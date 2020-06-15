@@ -10,11 +10,11 @@ using System.Web.Http;
 
 using Nethereum.Web3.Accounts;
 
-using WonkaBre;
-using WonkaEth.Extensions;
-using WonkaBre.RuleTree;
-using WonkaPrd;
-using WonkaRef;
+using Wonka.BizRulesEngine;
+using Wonka.Eth.Extensions;
+using Wonka.BizRulesEngine.RuleTree;
+using Wonka.Product;
+using Wonka.MetaData;
 
 namespace WonkaRestService.Controllers
 {
@@ -39,14 +39,14 @@ namespace WonkaRestService.Controllers
         static protected string msCustomOpId     = "";
         static protected string msCustomOpMethod = "";
 
-        static protected WonkaBreSource       moDefaultSource  = null;
+        static protected WonkaBizSource       moDefaultSource  = null;
         static protected IMetadataRetrievable moMetadataSource = null;
 
-        static protected Dictionary<string, WonkaBreSource> moAttrSourceMap = new Dictionary<string, WonkaBreSource>();
-        static protected Dictionary<string, WonkaBreSource> moCustomOpMap   = null;
+        static protected Dictionary<string, WonkaBizSource> moAttrSourceMap = new Dictionary<string, WonkaBizSource>();
+        static protected Dictionary<string, WonkaBizSource> moCustomOpMap   = null;
 
-        static protected WonkaEth.Orchestration.Init.OrchestrationInitData moOrchInitData      = null;
-        static protected WonkaEth.Init.WonkaEthRegistryInitialization      moWonkaRegistryInit = null;
+        static protected Wonka.Eth.Orchestration.Init.OrchestrationInitData moOrchInitData      = null;
+        static protected Wonka.Eth.Init.WonkaEthRegistryInitialization      moWonkaRegistryInit = null;
 
         protected bool mbInteractWithChain = true;
 
@@ -60,7 +60,7 @@ namespace WonkaRestService.Controllers
             return Convert.ToUInt32(dEpochTime);
         }
 
-        protected Nethereum.Contracts.Contract GetContract(WonkaBre.RuleTree.WonkaBreSource TargetSource)
+        protected Nethereum.Contracts.Contract GetContract(WonkaBizSource TargetSource)
         {
             var account = new Account(TargetSource.Password);
 
@@ -182,7 +182,7 @@ namespace WonkaRestService.Controllers
             if (moOrchInitData == null)
             {
                 var DelegateMap =
-                    new Dictionary<string, WonkaBre.Readers.WonkaBreXmlReader.ExecuteCustomOperator>();
+                    new Dictionary<string, Wonka.BizRulesEngine.Readers.WonkaBizRulesXmlReader.ExecuteCustomOperator>();
 
                 DelegateMap["lookupVATDenominator"] = InvokeController.LookupVATDenominator;
 
@@ -194,16 +194,16 @@ namespace WonkaRestService.Controllers
 
                     // We deserialize/parse the contents of the config file
                     System.Xml.Serialization.XmlSerializer WonkaEthSerializer =
-                        new System.Xml.Serialization.XmlSerializer(typeof(WonkaEth.Init.WonkaEthInitialization),
-                                                                   new System.Xml.Serialization.XmlRootAttribute("WonkaEthInitialization"));
+                        new System.Xml.Serialization.XmlSerializer(typeof(Wonka.Eth.Init.WonkaEthInitialization),
+                                                                   new System.Xml.Serialization.XmlRootAttribute("Wonka.EthInitialization"));
 
-                    WonkaEth.Init.WonkaEthInitialization WonkaInit =
-                        WonkaEthSerializer.Deserialize(new System.IO.StringReader(sInitXml)) as WonkaEth.Init.WonkaEthInitialization;
+                    Wonka.Eth.Init.WonkaEthInitialization WonkaInit =
+                        WonkaEthSerializer.Deserialize(new System.IO.StringReader(sInitXml)) as Wonka.Eth.Init.WonkaEthInitialization;
 
                     // Here, any embeddeded resources mentioned in the config file (instead of simple file URLs) are accessed here
                     WonkaInit.RetrieveEmbeddedResources(TmpAssembly);
 
-                    // The initialization data is transformed into a structure used by the WonkaEth namespace
+                    // The initialization data is transformed into a structure used by the Wonka.Eth namespace
                     moOrchInitData = WonkaInit.TransformIntoOrchestrationInit(moMetadataSource, DelegateMap);
                 }
 
@@ -219,11 +219,11 @@ namespace WonkaRestService.Controllers
 
                         // We deserialize/parse the contents of the config file
                         System.Xml.Serialization.XmlSerializer WonkaEthSerializer =
-                            new System.Xml.Serialization.XmlSerializer(typeof(WonkaEth.Init.WonkaEthRegistryInitialization),
-                                                                       new System.Xml.Serialization.XmlRootAttribute("WonkaEthRegistryInitialization"));
+                            new System.Xml.Serialization.XmlSerializer(typeof(Wonka.Eth.Init.WonkaEthRegistryInitialization),
+                                                                       new System.Xml.Serialization.XmlRootAttribute("Wonka.EthRegistryInitialization"));
 
                         moWonkaRegistryInit =
-                            WonkaEthSerializer.Deserialize(new System.IO.StringReader(sInitRegistryXml)) as WonkaEth.Init.WonkaEthRegistryInitialization;
+                            WonkaEthSerializer.Deserialize(new System.IO.StringReader(sInitRegistryXml)) as Wonka.Eth.Init.WonkaEthRegistryInitialization;
 
                         // Here, any embeddeded resources mentioned in the config file (instead of simple file URLs) are accessed here                
                         moWonkaRegistryInit.RetrieveEmbeddedResources(TmpAssembly);
@@ -251,7 +251,7 @@ namespace WonkaRestService.Controllers
                     msAbiOrchContract = moOrchInitData.DefaultBlockchainDataSource.ContractABI;
 
                     moDefaultSource =
-                        new WonkaBreSource(moOrchInitData.DefaultBlockchainDataSource.SourceId,
+                        new WonkaBizSource(moOrchInitData.DefaultBlockchainDataSource.SourceId,
                                            moOrchInitData.DefaultBlockchainDataSource.SenderAddress,
                                            moOrchInitData.DefaultBlockchainDataSource.Password,
                                            moOrchInitData.DefaultBlockchainDataSource.ContractAddress,
@@ -263,7 +263,7 @@ namespace WonkaRestService.Controllers
                     #endregion
 
                     // Here a mapping is created, where each Attribute points to a specific contract and its "accessor" methods
-                    // - the class that contains this information (contract, accessors, etc.) is of the WonkaBreSource type
+                    // - the class that contains this information (contract, accessors, etc.) is of the WonkaBizSource type
                     foreach (WonkaRefAttr TempAttr in RefEnv.AttrCache)
                     {
                         moAttrSourceMap[TempAttr.AttrName] = moDefaultSource;
@@ -278,17 +278,17 @@ namespace WonkaRestService.Controllers
                     msCustomOpMethod = "lookupVATDenominator";
 
                     // Here a mapping is created, where each Custom Operator points to a specific contract and its "implementation" method
-                    // - the class that contains this information (contract, accessors, etc.) is of the WonkaBreSource type    
+                    // - the class that contains this information (contract, accessors, etc.) is of the WonkaBizSource type    
                     if ((moOrchInitData.BlockchainCustomOpFunctions != null) && (moOrchInitData.BlockchainCustomOpFunctions.Count() > 0))
                         moCustomOpMap = moOrchInitData.BlockchainCustomOpFunctions;
                     else
                     {
-                        moCustomOpMap = new Dictionary<string, WonkaBreSource>();
+                        moCustomOpMap = new Dictionary<string, WonkaBizSource>();
 
                         // Here a mapping is created, where each Custom Operator points to a specific contract and its "implementation" method
-                        // - the class that contains this information (contract, accessors, etc.) is of the WonkaBreSource type
-                        WonkaBreSource CustomOpSource =
-                            new WonkaBreSource(msCustomOpId, msSenderAddress, msPassword, msOrchContractAddress, msAbiOrchContract, InvokeController.LookupVATDenominator, msCustomOpMethod);
+                        // - the class that contains this information (contract, accessors, etc.) is of the WonkaBizSource type
+                        WonkaBizSource CustomOpSource =
+                            new WonkaBizSource(msCustomOpId, msSenderAddress, msPassword, msOrchContractAddress, msAbiOrchContract, InvokeController.LookupVATDenominator, msCustomOpMethod);
 
                         moCustomOpMap[msCustomOpId] = CustomOpSource;
                     }
@@ -296,8 +296,8 @@ namespace WonkaRestService.Controllers
 
                 if (mbInteractWithChain)
                 {
-                    WonkaEth.Contracts.WonkaRuleTreeRegistry WonkaRegistry =
-                        WonkaEth.Contracts.WonkaRuleTreeRegistry.CreateInstance(moWonkaRegistryInit.BlockchainRegistry.ContractSender,
+                    Wonka.Eth.Contracts.WonkaRuleTreeRegistry WonkaRegistry =
+                        Wonka.Eth.Contracts.WonkaRuleTreeRegistry.CreateInstance(moWonkaRegistryInit.BlockchainRegistry.ContractSender,
                                                                                 moWonkaRegistryInit.BlockchainRegistry.ContractPassword,
                                                                                 moWonkaRegistryInit.BlockchainRegistry.ContractAddress,
                                                                                 moWonkaRegistryInit.BlockchainRegistry.ContractABI,
@@ -308,7 +308,7 @@ namespace WonkaRestService.Controllers
             }
         }
 
-        protected string RetrieveValueMethod(WonkaBre.RuleTree.WonkaBreSource poTargetSource, string psAttrName)
+        protected string RetrieveValueMethod(Wonka.BizRulesEngine.RuleTree.WonkaBizSource poTargetSource, string psAttrName)
         {
             string sResult = "";
 

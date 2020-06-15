@@ -5,8 +5,8 @@ using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 
-using WonkaBre.RuleTree;
-using WonkaRef;
+using Wonka.BizRulesEngine.RuleTree;
+using Wonka.MetaData;
 
 namespace WonkaRestService.Models
 {

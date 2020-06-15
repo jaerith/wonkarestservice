@@ -7,12 +7,12 @@ using Newtonsoft.Json;
 
 using Nethereum.Hex.HexConvertors.Extensions;
 
-using WonkaBre.Permissions;
+using Wonka.BizRulesEngine.Permissions;
 
 namespace WonkaRestService.Models
 {
     [DataContract(Namespace = "http://wonkarestservice.com")]
-    public class SvcTrxState : WonkaBreTransactionState
+    public class SvcTrxState : WonkaBizTransactionState
     {
         #region CONSTANTS
 
@@ -47,7 +47,7 @@ namespace WonkaRestService.Models
             Owners = null;
         }
 
-        public SvcTrxState(string psRulesEngineId, WonkaBreTransactionState poTrxState, HashSet<string> poAllOwners) :
+        public SvcTrxState(string psRulesEngineId, WonkaBizTransactionState poTrxState, HashSet<string> poAllOwners) :
             base(poAllOwners, poTrxState.GetMinScoreRequirement(), poTrxState.ContractAddress)
         {
             SerializeToBlockchain = null;

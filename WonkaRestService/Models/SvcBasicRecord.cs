@@ -34,8 +34,7 @@ namespace WonkaRestService.Models
         public string StackTraceMessage { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public WonkaBre.Reporting.WonkaBreRuleTreeReport RuleTreeReport { get; set; }
-
+        public Wonka.BizRulesEngine.Reporting.WonkaBizRuleTreeReport RuleTreeReport { get; set; }
 
         #endregion
     }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
 
-using WonkaBre;
+using Wonka.BizRulesEngine;
 
 using WonkaRestService.Models;
 
@@ -26,7 +26,7 @@ namespace WonkaRestService.Cache
         private WonkaServiceCache()
         {
             MarkupCache         = new Dictionary<string, string>();
-            RuleTreeCache       = new Dictionary<string, WonkaBreRulesEngine>();
+            RuleTreeCache       = new Dictionary<string, WonkaBizRulesEngine>();
             RuleTreeOriginCache = new Dictionary<string, SvcRuleTree>();
             GroveRegistryCache  = new Dictionary<string, SvcGrove>();
             ReportCache         = new Dictionary<string, List<SvcRuleTreeReport>>();
@@ -54,7 +54,7 @@ namespace WonkaRestService.Cache
 
         public Dictionary<string, string> MarkupCache { get; set; }
 
-        public Dictionary<string, WonkaBreRulesEngine> RuleTreeCache { get; set; }
+        public Dictionary<string, WonkaBizRulesEngine> RuleTreeCache { get; set; }
 
         public Dictionary<string, SvcRuleTree> RuleTreeOriginCache { get; set; }
 

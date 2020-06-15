@@ -14,7 +14,7 @@ namespace WonkaRestService.Models
         public SvcGrove()
         {
             RuleGrove = 
-                new WonkaEth.Contracts.WonkaRuleGrove("blank") { GroveDescription = "", OwnerId = null };
+                new Wonka.Eth.Contracts.WonkaRuleGrove("blank") { GroveDescription = "", OwnerId = null };
            
             RuleTreeMembers = new HashSet<string>();
 
@@ -28,7 +28,7 @@ namespace WonkaRestService.Models
         public SvcGrove(string psGroveId, string psGroveDesc = "")
         {
             RuleGrove =
-                new WonkaEth.Contracts.WonkaRuleGrove(psGroveId) { GroveDescription = psGroveDesc, OwnerId = null };
+                new Wonka.Eth.Contracts.WonkaRuleGrove(psGroveId) { GroveDescription = psGroveDesc, OwnerId = null };
 
             RuleTreeMembers = new HashSet<string>();
 
@@ -41,7 +41,7 @@ namespace WonkaRestService.Models
 
         #region Properties
 
-        public WonkaEth.Contracts.WonkaRuleGrove RuleGrove { get; set; }
+        public Wonka.Eth.Contracts.WonkaRuleGrove RuleGrove { get; set; }
 
         [DataMember, XmlElement(IsNullable = false), JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string GroveId
