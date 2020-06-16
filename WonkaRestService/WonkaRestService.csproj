@@ -324,6 +324,7 @@
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\RuleTreeController.cs" />
     <Compile Include="Controllers\RuleTreeOwnerController.cs" />
+    <Compile Include="Controllers\RunOnceController.cs" />
     <Compile Include="Controllers\TrxStateConfirmController.cs" />
     <Compile Include="Controllers\TrxStateController.cs" />
     <Compile Include="Controllers\TrxStateOwnerController.cs" />
@@ -349,6 +350,7 @@
     <Compile Include="Models\SvcRuleTreeOwner.cs" />
     <Compile Include="Models\SvcRuleTreeRegistry.cs" />
     <Compile Include="Models\SvcRuleTreeReport.cs" />
+    <Compile Include="Models\SvcRunOnce.cs" />
     <Compile Include="Models\SvcTrxState.cs" />
     <Compile Include="Models\SvcTrxStateOwner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
