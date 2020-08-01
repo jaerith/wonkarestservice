@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Web.Http;
 using WebActivatorEx;
 using WonkaRestService;
@@ -34,6 +35,8 @@ namespace WonkaRestService
                         //
                         c.SingleApiVersion("v1", "WonkaRestService");
 
+                        c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
                         // If you want the output Swagger docs to be indented properly, enable the "PrettyPrint" option.
                         //
                         //c.PrettyPrint();
@@ -61,7 +64,7 @@ namespace WonkaRestService
                         //c.BasicAuth("basic")
                         //    .Description("Basic HTTP Authentication");
                         //
-						// NOTE: You must also configure 'EnableApiKeySupport' below in the SwaggerUI section
+                        // NOTE: You must also configure 'EnableApiKeySupport' below in the SwaggerUI section
                         //c.ApiKey("apiKey")
                         //    .Description("API Key Authentication")
                         //    .Name("apiKey")
